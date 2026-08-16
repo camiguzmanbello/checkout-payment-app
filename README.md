@@ -20,6 +20,14 @@ baja únicamente cuando el cobro queda aprobado.
 | Documentación de la API (Swagger) | `http://localhost:3000/api-docs` | Local |
 | Repositorio | https://github.com/camiguzmanbello/checkout-payment-app | Público |
 
+> ℹ️ **La primera petición puede tardar.** El backend corre en el plan gratuito
+> de Render, que suspende el servicio cuando pasa un rato sin tráfico. La
+> primera petición después de esa inactividad tiene que despertar la instancia,
+> así que puede demorar unos segundos extra en responder — el catálogo tarda en
+> aparecer o el primer pago se siente lento. Las peticiones siguientes ya van a
+> velocidad normal. Es el comportamiento propio del plan gratuito, no un fallo
+> de la aplicación.
+
 <!--
 Al desplegar, reemplaza la tabla de arriba por esta:
 
