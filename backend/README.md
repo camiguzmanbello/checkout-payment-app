@@ -39,6 +39,32 @@ npm run start:dev
 
 The API then listens on `http://localhost:3000`.
 
+### Production build
+
+`prisma:seed` runs the seed through `ts-node`, which is a devDependency — so on a
+host that prunes dev dependencies after building, that script fails with
+`"ts-node" is not recognized`. Use the compiled seed instead:
+
+```bash
+npm ci                     # full install: the build needs the Nest CLI
+npm run prisma:generate
+npm run build              # emits dist/src/ and dist/prisma/seed.js
+npm prune --omit=dev       # drops ts-node and @nestjs/cli
+npx prisma migrate deploy  # applies migrations without generating new ones
+npm run prisma:seed:prod   # node dist/prisma/seed.js
+npm run start:prod         # node dist/src/main.js
+```
+
+Two things make that sequence work. `tsconfig.json` declares no `include` or
+`exclude`, so `nest build` compiles `prisma/seed.ts` alongside `src/` and the
+output lands in `dist/prisma/seed.js` — that is also why the entrypoint is
+`dist/src/main.js` and not `dist/main.js`. And `prisma migrate deploy` still runs
+after the prune because `@prisma/client` pulls the `prisma` CLI in as an optional
+peer, so it survives `--omit=dev`.
+
+The seed is idempotent (it only inserts the products that are missing), so
+running it on every deploy is safe.
+
 ### Database
 
 `docker-compose.yml` starts a Postgres 17 container named `checkout-db`, published

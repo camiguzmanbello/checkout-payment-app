@@ -131,6 +131,11 @@ npm run dev               # queda en http://localhost:5173
 Detalle en [`backend/README.md`](backend/README.md) y
 [`frontend/README.md`](frontend/README.md).
 
+> En producción el seed se corre con `npm run prisma:seed:prod`, no con
+> `npm run prisma:seed`: este último usa `ts-node`, que no sobrevive al descarte
+> de dependencias de desarrollo. La secuencia completa de despliegue está en
+> [`backend/README.md`](backend/README.md#production-build).
+
 ### Probar un pago
 
 Con las tarjetas de prueba de la pasarela, cualquier CVC y una fecha futura:
