@@ -106,6 +106,18 @@ export default function SummaryBackdrop() {
                     <span className="payment-card__number">
                       <span aria-hidden="true">•••• •••• ••••</span> {lastFour}
                     </span>
+                    <span className="payment-card__foot">
+                      <span className="payment-card__field">
+                        <small>Titular</small>
+                        {cardData?.cardHolder}
+                      </span>
+                      {cardData?.expMonth && cardData?.expYear && (
+                        <span className="payment-card__field payment-card__field--end">
+                          <small>Válida hasta</small>
+                          {cardData.expMonth}/{cardData.expYear}
+                        </span>
+                      )}
+                    </span>
                   </span>
                   <span className="visually-hidden">
                     Tarjeta terminada en {lastFour}

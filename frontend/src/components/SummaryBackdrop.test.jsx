@@ -32,7 +32,12 @@ function renderSummary(overrides = {}) {
         products: [],
         selectedProduct: product,
         quantity: 1,
-        cardData: { number: '4242 4242 4242 4242' },
+        cardData: {
+          number: '4242 4242 4242 4242',
+          cardHolder: 'Maria Camila Guzman',
+          expMonth: '12',
+          expYear: '29',
+        },
         deliveryData: { address: 'Calle 100 #15-20', city: 'Armenia', region: 'Quindío' },
         customerData: null,
         transaction,
@@ -94,6 +99,16 @@ describe('SummaryBackdrop', () => {
     // El número completo nunca aparece.
     expect(screen.queryByText(/4242 4242 4242 4242/)).not.toBeInTheDocument();
     expect(card.textContent).not.toContain('4242424242424242');
+  });
+
+  it('completes the card with the holder and the expiry it was given', () => {
+    const { container } = renderSummary();
+    const card = container.querySelector('.payment-card');
+
+    expect(card).toHaveTextContent('Maria Camila Guzman');
+    expect(card).toHaveTextContent('12/29');
+    // El CVC no se dibuja en ninguna parte: no está impreso al frente.
+    expect(card.textContent).not.toContain('123');
   });
 
   it('keeps the card readable for a screen reader', () => {

@@ -1468,47 +1468,134 @@ button:disabled {
 }
 
 /* Tarjeta dibujada, no una línea de texto: el resumen es el momento de
-   confirmar con qué se va a pagar, y ahí la marca tiene que verse. */
+   confirmar con qué se va a pagar, y ahí la marca tiene que verse.
+   La proporción es la real de una tarjeta (85.6 x 53.98 mm), que es lo que
+   más hace por que se lea como tal. */
 .payment-card {
+  position: relative;
   display: grid;
+  grid-template-areas:
+    'chip brand'
+    'number number'
+    'foot foot';
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-  width: 200px;
+  align-content: space-between;
+  width: 218px;
+  aspect-ratio: 1.586 / 1;
   padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #1f231d 0%, #2f342c 60%, #232720 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(186, 255, 41, 0.16) 0%, transparent 55%),
+    linear-gradient(135deg, #1d211b 0%, #333930 55%, #20241e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
   color: #f2f4ef;
+  overflow: hidden;
 }
 
-/* El chip dorado es lo que hace que se lea como tarjeta y no como recuadro. */
+/* Brillo diagonal: le da el reflejo del plástico. */
+.payment-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0) 58%
+  );
+  pointer-events: none;
+}
+
+/* El chip dorado con sus contactos es lo que la vuelve reconocible. */
 .payment-card__chip {
-  width: 30px;
-  height: 22px;
+  grid-area: chip;
+  position: relative;
+  width: 34px;
+  height: 25px;
   border-radius: 5px;
-  background: linear-gradient(150deg, #e8c76a 0%, #c9a23f 50%, #f1dc9a 100%);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+  background: linear-gradient(150deg, #efd489 0%, #c9a23f 48%, #f6e6ae 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.22);
+}
+
+.payment-card__chip::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background:
+    linear-gradient(
+      to right,
+      transparent 46%,
+      rgba(90, 66, 12, 0.55) 46%,
+      rgba(90, 66, 12, 0.55) 54%,
+      transparent 54%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 28%,
+      rgba(90, 66, 12, 0.55) 28%,
+      rgba(90, 66, 12, 0.55) 36%,
+      transparent 36%,
+      transparent 64%,
+      rgba(90, 66, 12, 0.55) 64%,
+      rgba(90, 66, 12, 0.55) 72%,
+      transparent 72%
+    );
 }
 
 .payment-card .card-brand {
+  grid-area: brand;
   position: static;
   transform: none;
   justify-self: end;
-  width: 52px;
-  height: 32px;
-  background: #ffffff;
-  border-color: rgba(255, 255, 255, 0.4);
+  align-self: start;
+  width: 50px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .payment-card__number {
-  grid-column: 1 / -1;
-  font-size: 0.86rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  grid-area: number;
+  font-size: 0.94rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
+.payment-card__foot {
+  grid-area: foot;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.payment-card__field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payment-card__field--end {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.payment-card__field small {
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+  margin-bottom: 1px;
 }
 
 /* Mientras se cobra, la tarjeta late: el estado de proceso deja de ser solo
@@ -1518,8 +1605,8 @@ button:disabled {
 }
 
 @keyframes card-pulse {
-  0%, 100% { box-shadow: var(--shadow-sm); }
-  50% { box-shadow: 0 0 0 4px rgba(186, 255, 41, 0.22); }
+  0%, 100% { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28); }
+  50% { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28), 0 0 0 4px rgba(186, 255, 41, 0.24); }
 }
 
 .visually-hidden {
