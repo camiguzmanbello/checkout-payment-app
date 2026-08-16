@@ -132,6 +132,50 @@ body {
   min-height: 100dvh;
 }
 
+/* Barras de desplazamiento: el gris del sistema no sigue el tema y en oscuro
+   canta. Firefox usa scrollbar-color; el resto, los pseudoelementos. Ambos
+   toman los mismos tokens, así que cambian solas con el tema. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+  border-radius: 999px;
+  /* El borde transparente adelgaza el pulgar y lo separa del borde. */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+@media (hover: hover) {
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-muted);
+  }
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* El scroll dentro del modal y de las listas se despega de los bordes
+   redondeados con un pulgar más delgado. */
+.modal,
+.backdrop-sheet,
+.select__list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
 img {
   display: block;
   max-width: 100%;
