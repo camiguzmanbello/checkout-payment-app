@@ -85,7 +85,9 @@ Nothing malformed can be typed in the first place:
   city are lists, so a month like `20` or a misspelled city cannot be entered.
   Months already gone are disabled within the current year, and a department
   only offers its own municipalities.
-- **CVC length follows the brand**: four digits for Amex, three otherwise.
+- **Length follows the brand**: the number is 16 digits for Visa and
+  MasterCard and 15 for American Express, which is also grouped 4-6-5 the way
+  it is printed. The CVC is four digits for Amex and three otherwise.
 - **Errors appear per field**, as soon as it loses focus, and clear as soon as
   the value becomes valid. Submitting an incomplete form marks every pending
   field and moves the focus to the first one.
@@ -186,15 +188,15 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-139 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
+146 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
 the suite is deterministic and runs in CI without a backend.
 
 | Metric | Coverage |
 | --- | --- |
-| Statements | 91.09% |
-| Lines | 93.17% |
-| Functions | 89.37% |
-| Branches | 86.97% |
+| Statements | 91.03% |
+| Lines | 93.43% |
+| Functions | 89.5% |
+| Branches | 86.93% |
 
 What each suite covers:
 
