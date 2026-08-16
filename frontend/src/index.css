@@ -279,15 +279,43 @@ img {
 
 /* Subrayado, no resaltado: la banda queda bajo la línea base para que el texto
    claro no caiga encima del lima y deje de leerse. */
-/* En su propia línea: el subrayado lima se lee como un remate del titular y
-   no como una banda perdida a mitad de una frase larga. */
+/* En su propia línea, con un trazo de marcador detrás en vez de una banda
+   recta: el SVG tiene los bordes irregulares y los extremos afinados, así que
+   cruza la mitad baja del texto como un resaltador pasado a mano.
+   Va detrás de las letras (z-index) para que el texto siga legible encima. */
 .hero__accent {
+  position: relative;
   display: block;
   width: fit-content;
-  background-image: linear-gradient(transparent 86%, var(--color-accent) 86%);
+  padding: 0 0.12em 0.06em;
+  isolation: isolate;
+}
+
+.hero__accent::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  bottom: 0.04em;
+  height: 0.5em;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44' preserveAspectRatio='none'><path d='M2.5,14.5c26-6.2,54.7-3.1,82.4-4.3c30.6-1.3,61.3-4.7,92.1-3.1c8.3,0.4,16.4,1.1,22.9,2.6c1.3,0.3,0.6,2.4-0.7,2.6c-24.7,3.4-49.8,2.2-74.7,3c-33.9,1.1-67.8,4.2-101.8,3.4c-6.6-0.2-13.3-0.6-19.7-1.6C1.1,16.9,1.2,14.8,2.5,14.5z' fill='%23baff29'/><path d='M4,22c30.5-4.2,61.6-2.1,92.4-3.4c28.9-1.2,57.7-4.1,86.7-3.1c5.6,0.2,11.3,0.6,16.4,1.7c1.4,0.3,1,3.4-0.4,3.7c-21.4,4.4-43.5,3.6-65.3,4.3c-35.6,1.2-71.2,4.6-106.9,3.6c-7.6-0.2-15.3-0.7-22.7-1.9C2.6,26.6,2.6,22.2,4,22z' fill='%23baff29'/></svg>");
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  padding-bottom: 0.04em;
+  transform: rotate(-0.6deg);
+}
+
+/* Sobre foto o en oscuro el trazo se atenúa: el texto es claro y encima del
+   lima a plena opacidad dejaría de leerse. */
+.showcase__copy .hero__accent::before,
+:root[data-theme='dark'] .hero__accent::before {
+  opacity: 0.55;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .hero__accent::before {
+    opacity: 0.55;
+  }
 }
 
 .hero__lead {
@@ -679,7 +707,7 @@ img {
 }
 
 .product-card--sold-out {
-  opacity: 0.72;
+  opacity: 0.50;
 }
 
 .product-media {
@@ -725,7 +753,7 @@ img {
   flex: 1;
 }
 
-.product-body h2 {
+.product-body h3 {
   font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: -0.01em;
