@@ -39,7 +39,7 @@ function renderApp(step) {
   return render(<Provider store={store}><App /></Provider>);
 }
 
-const catalogue = () => screen.queryByText('Nuestro catálogo');
+const catalogue = () => screen.queryByText('Todo el catálogo');
 
 describe('App', () => {
   it('shows only the catalogue on the first step', () => {

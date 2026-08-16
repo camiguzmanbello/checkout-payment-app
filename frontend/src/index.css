@@ -149,32 +149,240 @@ img {
   padding: var(--space-6) var(--space-4) var(--space-7);
 }
 
-/* ---------------------------------------------------------------- header -- */
+/* ------------------------------------------------------------- landing -- */
 
-.page-header {
-  margin-bottom: var(--space-5);
+.page {
+  width: 100%;
 }
 
-.eyebrow {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-2);
+.landing {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
 }
 
-.page-header h1 {
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
+/* ----------------------------------------------------------- showcase -- */
+
+/* El carrusel es lo primero y va a sangre, con el titular encima. Al vivir
+   fuera del contenedor centrado no hacen falta trucos de 100vw. */
+.showcase {
+  position: relative;
+  width: 100%;
+}
+
+.showcase .carousel__slide {
+  min-height: min(86dvh, 620px);
+  border-radius: 0;
+  /* Fondo oscuro detrás: la foto se baja de opacidad contra él, así el titular
+     gana sin tener que cargar más el degradado. */
+  background: #0a0c09;
+}
+
+.showcase .carousel__slide img {
+  opacity: 0.38;
+}
+
+.showcase .carousel__track {
+  border-radius: 0;
+}
+
+/* Capa del titular: no intercepta clics, para que las flechas, los puntos y el
+   botón de comprar sigan siendo alcanzables. */
+.showcase__intro {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+}
+
+.showcase__copy {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) 0;
+  color: #f5f7f2;
+}
+
+.showcase__copy .eyebrow {
+  color: rgba(245, 247, 242, 0.75);
+}
+
+.showcase__copy h1 {
+  font-size: clamp(2rem, 5.6vw, 4rem);
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  max-width: 18ch;
+  text-shadow: 0 2px 24px rgba(10, 12, 9, 0.45);
+}
+
+.showcase__copy .hero__lead {
+  color: rgba(245, 247, 242, 0.82);
+  max-width: 34ch;
+  margin-top: var(--space-4);
+}
+
+/* Los puntos se montan sobre la imagen en vez de colgar debajo. */
+/* El carrusel suelto limita su copia al 60% desde 700px, y ese max-width
+   rompía el centrado del contenedor: la info quedaba desalineada del titular.
+   Dentro del showcase manda el contenedor, y el texto se estrecha por dentro. */
+.showcase .carousel__copy {
+  max-width: var(--content-max);
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
+
+.showcase .carousel__copy h2,
+.showcase .carousel__copy .carousel__description {
+  max-width: 24ch;
+}
+
+.showcase .carousel__copy .carousel__description {
+  max-width: 44ch;
+}
+
+.showcase .carousel__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--space-4);
+  z-index: 3;
+  margin-top: 0;
+}
+
+.showcase .carousel__dot {
+  background: rgba(245, 247, 242, 0.45);
+}
+
+.showcase .carousel__dot.is-active {
+  background: var(--color-accent);
+}
+
+/* Encabezado de respaldo cuando todavía no hay destacados que mostrar. */
+.hero {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) 0;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+/* Subrayado, no resaltado: la banda queda bajo la línea base para que el texto
+   claro no caiga encima del lima y deje de leerse. */
+/* En su propia línea: el subrayado lima se lee como un remate del titular y
+   no como una banda perdida a mitad de una frase larga. */
+.hero__accent {
+  display: block;
+  width: fit-content;
+  background-image: linear-gradient(transparent 86%, var(--color-accent) 86%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding-bottom: 0.04em;
+}
+
+.hero__lead {
+  color: rgba(245, 247, 242, 0.82);
+  max-width: 34ch;
+  margin-top: var(--space-4);
+}
+
+/* Los puntos se montan sobre la imagen en vez de colgar debajo. */
+/* El carrusel suelto limita su copia al 60% desde 700px, y ese max-width
+   rompía el centrado del contenedor: la info quedaba desalineada del titular.
+   Dentro del showcase manda el contenedor, y el texto se estrecha por dentro. */
+.showcase .carousel__copy {
+  max-width: var(--content-max);
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
+
+.showcase .carousel__copy h2,
+.showcase .carousel__copy .carousel__description {
+  max-width: 24ch;
+}
+
+.showcase .carousel__copy .carousel__description {
+  max-width: 44ch;
+}
+
+.showcase .carousel__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--space-4);
+  z-index: 3;
+  margin-top: 0;
+}
+
+.showcase .carousel__dot {
+  background: rgba(245, 247, 242, 0.45);
+}
+
+.showcase .carousel__dot.is-active {
+  background: var(--color-accent);
+}
+
+/* Encabezado de respaldo cuando todavía no hay destacados que mostrar. */
+.hero {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) 0;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+/* Subrayado, no resaltado: la banda queda bajo la línea base para que el texto
+   claro no caiga encima del lima y deje de leerse. */
+/* En su propia línea: el subrayado lima se lee como un remate del titular y
+   no como una banda perdida a mitad de una frase larga. */
+.hero__accent {
+  display: block;
+  width: fit-content;
+  background-image: linear-gradient(transparent 86%, var(--color-accent) 86%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding-bottom: 0.04em;
+}
+
+.hero__lead {
+  color: var(--color-text-muted);
+  margin-top: var(--space-4);
+  font-size: 1rem;
+  max-width: 46ch;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.section-head h2 {
+  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .page-subtitle {
   color: var(--color-text-muted);
   font-size: 0.88rem;
-  margin-top: var(--space-2);
 }
 
 /* ----------------------------------------------------------- carrusel -- */
