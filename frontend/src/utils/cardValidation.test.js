@@ -1,4 +1,6 @@
 import {
+  cardLengthFor,
+  cardInputLengthFor,
   isValidCardNumber,
   detectCardBrand,
   isValidExpiry,
@@ -122,8 +124,26 @@ describe('formatCardNumber', () => {
     expect(formatCardNumber('4242424242424242')).toBe('4242 4242 4242 4242');
   });
 
+  it('groups Amex as 4-6-5, the way it is printed', () => {
+    expect(formatCardNumber('378282246310005')).toBe('3782 822463 10005');
+  });
+
   it('drops anything that is not a digit', () => {
     expect(formatCardNumber('4242-abc-4242')).toBe('4242 4242');
+  });
+
+  // El campo daba cabida a 19 dígitos, y ninguna marca que aceptamos los usa.
+  it('stops at the length of the brand', () => {
+    expect(formatCardNumber('4242424242424242999')).toBe('4242 4242 4242 4242');
+    expect(formatCardNumber('378282246310005999')).toBe('3782 822463 10005');
+  });
+
+  it('reports the length each brand needs', () => {
+    expect(cardLengthFor('visa')).toBe(16);
+    expect(cardLengthFor('mastercard')).toBe(16);
+    expect(cardLengthFor('amex')).toBe(15);
+    expect(cardInputLengthFor('visa')).toBe(19); // 16 dígitos + 3 espacios
+    expect(cardInputLengthFor('amex')).toBe(17); // 15 dígitos + 2 espacios
   });
 });
 
@@ -144,6 +164,21 @@ describe('validateField', () => {
 
   it('returns null for every field of a valid form', () => {
     expect(validateForm(validForm)).toEqual({});
+  });
+
+  it('rejects a number shorter than its brand needs', () => {
+    const form = { ...validForm, cardNumber: '4242 4242 4242' };
+    expect(validateField('cardNumber', form.cardNumber, form)).toMatch(/16 dígitos/);
+  });
+
+  it('states the 15 digits of Amex', () => {
+    const form = { ...validForm, cardNumber: '3782 822463 1000' };
+    expect(validateField('cardNumber', form.cardNumber, form)).toMatch(/15 dígitos/);
+  });
+
+  it('accepts a well formed Amex number', () => {
+    const form = { ...validForm, cardNumber: '3782 822463 10005', cvc: '1234' };
+    expect(validateField('cardNumber', form.cardNumber, form)).toBeNull();
   });
 
   it('asks for the card number when it is empty', () => {

@@ -158,6 +158,17 @@ describe('CheckoutModal', () => {
     expect(card.value).toBe('4242 4242 4242 4242');
   });
 
+  it('sizes the field to the brand instead of leaving room for 19 digits', () => {
+    renderModal();
+
+    const card = document.querySelector('[name="cardNumber"]');
+    expect(card).toHaveAttribute('maxlength', '19'); // 16 dígitos + 3 espacios
+
+    typeIn('cardNumber', '378282246310005');
+    expect(card.value).toBe('3782 822463 10005');
+    expect(card).toHaveAttribute('maxlength', '17'); // 15 dígitos + 2 espacios
+  });
+
   it('reveals every pending error when submitting an incomplete form', () => {
     renderModal();
 

@@ -11,6 +11,7 @@ import {
   detectCardBrand,
   formatCardNumber,
   cvcLengthFor,
+  cardInputLengthFor,
   isValidCardNumber,
   validateField,
   validateForm,
@@ -251,7 +252,9 @@ export default function CheckoutModal() {
               {
                 inputMode: 'numeric',
                 autoComplete: 'cc-number',
-                maxLength: 23, // 19 dígitos + 4 espacios de formato
+                // Se ajusta a la marca: 16 dígitos + 3 espacios, o los 15 de
+                // Amex + 2. Antes daba cabida a 19 y sobraba campo.
+                maxLength: cardInputLengthFor(brand),
                 placeholder: '4242 4242 4242 4242',
               },
               <CardBrandIcon brand={brand} />,

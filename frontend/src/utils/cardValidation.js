@@ -105,12 +105,38 @@ export function isMonthUnavailable(month, year, today = new Date()) {
   return parseInt(month, 10) < today.getMonth() + 1;
 }
 
-export function formatCardNumber(value) {
-  return value
-    .replace(/\D/g, '')
-    .slice(0, 19)
-    .replace(/(.{4})/g, '$1 ')
-    .trim();
+// Cuántos dígitos tiene cada marca: Visa y MasterCard 16, Amex 15. Sin marca
+// todavía se permite hasta 16, que es el máximo de lo que aceptamos.
+export function cardLengthFor(brand) {
+  return brand === 'amex' ? 15 : 16;
+}
+
+// Amex se agrupa 4-6-5 (3782 822463 10005), no en bloques de cuatro.
+const AMEX_GROUPS = [4, 6, 5];
+
+export function formatCardNumber(value, brand) {
+  const digits = String(value).replace(/\D/g, '');
+  const detected = brand ?? detectCardBrand(digits);
+  const limited = digits.slice(0, cardLengthFor(detected));
+
+  if (detected !== 'amex') {
+    return limited.replace(/(.{4})/g, '$1 ').trim();
+  }
+
+  const parts = [];
+  let cursor = 0;
+  for (const size of AMEX_GROUPS) {
+    if (cursor >= limited.length) break;
+    parts.push(limited.slice(cursor, cursor + size));
+    cursor += size;
+  }
+  return parts.join(' ');
+}
+
+// Longitud del campo con el formato incluido: 16 dígitos + 3 espacios, o los
+// 15 de Amex + 2 espacios.
+export function cardInputLengthFor(brand) {
+  return brand === 'amex' ? 17 : 19;
 }
 
 // Formato de correo: parte local, dominio con al menos un punto y TLD de 2+
@@ -131,11 +157,19 @@ export function validateField(field, value, form = {}) {
   const brand = detectCardBrand(form.cardNumber ?? '');
 
   switch (field) {
-    case 'cardNumber':
+    case 'cardNumber': {
       if (!text) return 'Ingresa el número de tu tarjeta';
-      if (!isValidCardNumber(text)) return 'Número de tarjeta inválido';
+      const digits = text.replace(/\D/g, '');
       if (brand === 'unknown') return 'Solo aceptamos Visa, MasterCard y Amex';
+      const expected = cardLengthFor(brand);
+      if (digits.length !== expected) {
+        return brand === 'amex'
+          ? 'American Express tiene 15 dígitos'
+          : 'Este número debe tener 16 dígitos';
+      }
+      if (!isValidCardNumber(text)) return 'Número de tarjeta inválido';
       return null;
+    }
 
     case 'cardHolder':
       if (!text) return 'Ingresa el nombre que aparece en la tarjeta';
