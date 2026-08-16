@@ -20,7 +20,9 @@ src/
     client.js             -> fetch wrapper over the backend
     apiBaseUrl.js         -> reads VITE_API_URL, isolated so Jest can stub it
   components/
-    ProductPage.jsx       -> screen 1, the catalogue
+    ProductPage.jsx       -> screen 1, the landing page
+    FeaturedCarousel.jsx  -> scroll-snap carousel of featured products
+    SiteFooter.jsx        -> closing section and authorship
     CheckoutModal.jsx     -> screen 2, card and delivery details
     SummaryBackdrop.jsx   -> screen 3, the summary
     FinalStatus.jsx       -> screens 4 and 5, the outcome
@@ -59,8 +61,10 @@ configured in `.env`, and that origin has to be listed in the backend's
 One screen at a time: the modal and the summary are layers over the catalogue,
 while the result replaces the view entirely.
 
-1. **Catalogue** — products with price and stock, a badge on the last units and
-   on anything sold out. Skeletons while loading and a retry panel on failure.
+1. **Landing** — the carousel of featured products running full bleed with the
+   headline over it, then the full catalogue, then a closing section. Products
+   carry a badge on the last units and on anything sold out. Skeletons while
+   loading and a retry panel on failure.
 2. **Card and delivery** — the payment form, described below.
 3. **Summary** — the product, the line items in plain Spanish, the total, the
    card being charged and the shipping address.
@@ -124,6 +128,43 @@ Attribution lives in `public/products/CREDITS.md`: five are CC0 or public domain
 the rest are CC BY or CC BY-SA and do require credit. The seed keeps the URLs in
 sync and refreshes them on products that already exist.
 
+## The showcase
+
+The page opens with the carousel, full bleed, and the headline sitting over the
+photo. The headline used to be a band of its own, which left half the width
+empty on a wide screen; over the image there is no empty half to leave.
+
+Featured products are the four most expensive ones still in stock: an explicit
+rule, so no `featured` flag is needed in the database.
+
+Three things worth knowing if you touch it:
+
+- The showcase lives **outside** the centred container, so going full bleed
+  needs no `100vw` trick — the usual one brings a horizontal scrollbar along
+  whenever there is a vertical one. Its inner text still lines up with the
+  1120px container, so the headline and the product name share a left edge.
+- The overlay holding the headline has `pointer-events: none`. Without it, it
+  covers the whole carousel and swallows the clicks meant for the arrows, the
+  dots and the buy button.
+- The photo drops to 68% opacity over a near-black slide, instead of darkening
+  the veil further: a heavier veil buries the lower half of the picture, while
+  lowering the opacity dims it evenly and lets the headline win.
+
+The carousel itself is a scroll container with `scroll-snap-type: x mandatory`,
+not a stack of transforms. On a phone it is swiped with a finger like any native
+scroll, and the arrows and dots only move that same scroll, which is why there
+is no carousel library here. The active dot follows whatever the scroll does, so
+swiping and pressing stay in sync.
+
+It advances on its own every six seconds, pausing while the pointer or the
+keyboard focus is on it, and never advancing at all under
+`prefers-reduced-motion`.
+
+The lime accent under the headline is an inline SVG marker stroke with uneven
+edges, sitting behind the letters and crossing their lower half. Over the photo
+and in dark mode it drops to 55%, because light text over full-strength lime
+stops being legible.
+
 ## Responsive design
 
 Mobile-first, with an `auto-fill` grid that goes from one column on a phone up
@@ -144,15 +185,15 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-118 tests across 11 suites. Nothing reaches the network: `fetch` is mocked, so
+137 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
 the suite is deterministic and runs in CI without a backend.
 
 | Metric | Coverage |
 | --- | --- |
-| Statements | 92.22% |
-| Lines | 94.63% |
-| Functions | 90.9% |
-| Branches | 86.85% |
+| Statements | 91.07% |
+| Lines | 93.15% |
+| Functions | 89.44% |
+| Branches | 86.84% |
 
 What each suite covers:
 
@@ -163,7 +204,8 @@ What each suite covers:
 | `CheckoutModal.test.jsx` | Per-field errors, progressive unlocking, the brand logo inside the field, the option lists, and closing behaviour |
 | `SummaryBackdrop.test.jsx` | Line items named in Spanish, amounts in COP, only the last four card digits, the locked state while paying |
 | `FinalStatus.test.jsx` | The three outcomes, including unconfirmed as distinct from declined |
-| `ProductPage.test.jsx` | Rendering the catalogue and disabling a sold out product |
+| `ProductPage.test.jsx` | The landing sections, which products get featured, and disabling a sold out one |
+| `FeaturedCarousel.test.jsx` | Moving with arrows, dots and keys, autoplay and its pauses |
 | `App.test.jsx` | One screen at a time, and the result replacing the catalogue |
 | `checkoutSlice.test.js` | Reducers plus the three thunks, on success and on failure |
 | `client.test.js` | Every endpoint, and how backend errors are surfaced |
