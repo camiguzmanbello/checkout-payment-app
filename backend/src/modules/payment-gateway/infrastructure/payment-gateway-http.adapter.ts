@@ -21,7 +21,7 @@ const CURRENCY = 'COP';
 // Card charges come back PENDING and finalize a few seconds later, so step 4
 // polls until the gateway reports a terminal status or we run out of budget.
 const POLL_INTERVAL_MS = Number(process.env.PAYMENT_GATEWAY_POLL_INTERVAL_MS ?? 1500);
-const POLL_TIMEOUT_MS = Number(process.env.PAYMENT_GATEWAY_POLL_TIMEOUT_MS ?? 20000);
+const POLL_TIMEOUT_MS = Number(process.env.PAYMENT_GATEWAY_POLL_TIMEOUT_MS ?? 25000);
 
 // Statuses the gateway can report. VOIDED and ERROR are terminal but not a
 // successful charge, so they collapse into our own ERROR.

@@ -100,7 +100,7 @@ docker compose down -v   # stop and wipe the database
 | `PAYMENT_GATEWAY_PRIVATE_KEY` | Private key — transaction creation |
 | `PAYMENT_GATEWAY_INTEGRITY_SECRET` | Integrity secret — signs every transaction |
 | `PAYMENT_GATEWAY_POLL_INTERVAL_MS` | Optional, default 1500 — delay between status polls |
-| `PAYMENT_GATEWAY_POLL_TIMEOUT_MS` | Optional, default 20000 — how long to wait for a PENDING charge |
+| `PAYMENT_GATEWAY_POLL_TIMEOUT_MS` | Optional, default 25000 — how long to wait for a PENDING charge |
 
 `.env` is never committed. `@prisma/client` loads it automatically at startup, so
 the whole file is available through `process.env` without an extra config module.
