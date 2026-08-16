@@ -170,6 +170,11 @@ stops being legible.
 
 ## Responsive design
 
+Scrollbars are themed rather than left to the system, which ignores the theme
+and grates in dark mode: `scrollbar-color` covers Firefox and the
+`::-webkit-scrollbar` pseudo-elements cover the rest, both reading the same
+tokens.
+
 Mobile-first, with an `auto-fill` grid that goes from one column on a phone up
 to four on a wide screen. The modal is a bottom sheet on a phone and a centred
 dialog from 600px up. Fields are 16px so iOS does not zoom in on focus, controls
@@ -188,7 +193,7 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-146 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
+147 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
 the suite is deterministic and runs in CI without a backend.
 
 | Metric | Coverage |
