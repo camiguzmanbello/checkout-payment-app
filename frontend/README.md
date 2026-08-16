@@ -6,6 +6,10 @@ localStorage.
 ## Structure
 
 ```
+public/
+  favicon.svg           -> app icon: a shopping bag holding a card
+  products/*.jpg        -> one photo per catalogue product
+  products/CREDITS.md   -> source and licence of every photo
 src/
   app/
     store.js              -> Redux setup + localStorage subscription
@@ -22,6 +26,7 @@ src/
     FinalStatus.jsx       -> screens 4 and 5, the outcome
     SelectField.jsx       -> listbox used instead of a native select
     CardBrandIcon.jsx     -> inline SVG logos for Visa, MasterCard and Amex
+    ThemeToggle.jsx       -> light/dark switch
   utils/
     cardValidation.js     -> Luhn, brand detection and per-field rules
     colombia.js           -> departments and municipalities for the delivery form
@@ -86,6 +91,39 @@ The same rules live in the backend DTOs. Validating twice is deliberate: the
 frontend is for the person filling the form, the backend is what actually
 protects the database.
 
+## Light and dark
+
+Both themes come from the same set of custom properties, so a component never
+knows which one is active. The lime accent is the brand and stays put in both;
+what changes is the canvas. The one pair that flips is the solid one used by the
+primary button and the solid badges: dark background with lime text on light,
+the other way round on dark, because lime on near-white cannot be read.
+
+The theme follows the system preference on its own. The toggle in the corner
+only takes over once someone presses it, and that choice is remembered in
+localStorage. A small inline script in `index.html` applies the saved choice
+before the first paint, so entering in dark mode does not flash white.
+
+The card brand chip keeps a light background in both themes on purpose: the
+Visa and Amex logos are dark and would disappear against a dark surface.
+
+Autofill needs its own handling: the browser paints those fields with a fixed
+blue of its own that ignores the theme entirely. The background cannot be set
+directly, so it is covered with a large inset shadow in the surface colour, with
+the text colour forced through `-webkit-text-fill-color`.
+
+## Product images
+
+Each product carries a real photo in `public/products`, matching what it is: the
+headphones show headphones, the mesh chair shows a mesh chair. They come from
+Wikimedia Commons under free licences and are downloaded into the repository, so
+the catalogue does not depend on an external host that can rate-limit or vanish.
+Around 950KB for the nine of them at 900px wide.
+
+Attribution lives in `public/products/CREDITS.md`: five are CC0 or public domain,
+the rest are CC BY or CC BY-SA and do require credit. The seed keeps the URLs in
+sync and refreshes them on products that already exist.
+
 ## Responsive design
 
 Mobile-first, with an `auto-fill` grid that goes from one column on a phone up
@@ -106,15 +144,15 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-112 tests across 10 suites. Nothing reaches the network: `fetch` is mocked, so
+118 tests across 11 suites. Nothing reaches the network: `fetch` is mocked, so
 the suite is deterministic and runs in CI without a backend.
 
 | Metric | Coverage |
 | --- | --- |
-| Statements | 91.84% |
-| Lines | 94.49% |
-| Functions | 90.16% |
-| Branches | 86.06% |
+| Statements | 92.22% |
+| Lines | 94.63% |
+| Functions | 90.9% |
+| Branches | 86.85% |
 
 What each suite covers:
 
@@ -130,6 +168,7 @@ What each suite covers:
 | `checkoutSlice.test.js` | Reducers plus the three thunks, on success and on failure |
 | `client.test.js` | Every endpoint, and how backend errors are surfaced |
 | `localStorage.test.js`, `store.test.js` | Rehydration, and that card data never reaches disk |
+| `ThemeToggle.test.jsx` | Following the system theme, pinning a choice, and surviving storage being unavailable |
 
 `src/main.jsx` and `src/api/apiBaseUrl.js` are excluded from coverage: the first
 only mounts the app, and the second is replaced by a stub because `import.meta`
