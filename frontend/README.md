@@ -27,7 +27,8 @@ src/
     SummaryBackdrop.jsx   -> screen 3, the summary
     FinalStatus.jsx       -> screens 4 and 5, the outcome
     SelectField.jsx       -> listbox used instead of a native select
-    CardBrandIcon.jsx     -> inline SVG logos for Visa, MasterCard and Amex
+    CardBrandIcon.jsx     -> inline SVG logos for Visa, MasterCard and Amex,
+                             reused on the card drawn in the summary
     ThemeToggle.jsx       -> light/dark switch
   utils/
     cardValidation.js     -> Luhn, brand detection and per-field rules
@@ -185,15 +186,15 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-137 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
+139 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
 the suite is deterministic and runs in CI without a backend.
 
 | Metric | Coverage |
 | --- | --- |
-| Statements | 91.07% |
-| Lines | 93.15% |
+| Statements | 91.09% |
+| Lines | 93.17% |
 | Functions | 89.37% |
-| Branches | 86.84% |
+| Branches | 86.97% |
 
 What each suite covers:
 
@@ -202,7 +203,7 @@ What each suite covers:
 | `cardValidation.test.js` | Luhn, brands, future-only expiry, CVC per brand, email format, city belonging to its department |
 | `colombia.js` (via the above) | The dataset is exercised by the location rules |
 | `CheckoutModal.test.jsx` | Per-field errors, progressive unlocking, the brand logo inside the field, the option lists, and closing behaviour |
-| `SummaryBackdrop.test.jsx` | Line items named in Spanish, amounts in COP, only the last four card digits, the locked state while paying |
+| `SummaryBackdrop.test.jsx` | Line items named in Spanish, amounts in COP, the drawn card showing brand and last four only, the locked state while paying |
 | `FinalStatus.test.jsx` | The three outcomes, including unconfirmed as distinct from declined |
 | `ProductPage.test.jsx` | The landing sections, which products get featured, and disabling a sold out one |
 | `FeaturedCarousel.test.jsx` | Moving with arrows, dots and keys, autoplay and its pauses |
