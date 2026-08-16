@@ -19,11 +19,15 @@
 
   --space-1: 4px;
   --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
+  --space-3: 10px;
+  --space-4: 14px;
+  --space-5: 20px;
+  --space-6: 26px;
+  --space-7: 40px;
+
+  /* Alto único para inputs, selects y botones: 44px es el mínimo táctil
+     cómodo y se ve bastante menos pesado que los 48px anteriores. */
+  --control-height: 44px;
 
   --shadow-sm: 0 1px 2px rgba(16, 18, 15, 0.04);
   --shadow-md: 0 6px 24px rgba(16, 18, 15, 0.08);
@@ -47,7 +51,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
-  line-height: 1.45;
+  line-height: 1.4;
   min-height: 100dvh;
 }
 
@@ -84,7 +88,7 @@ img {
 }
 
 .page-header h1 {
-  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.1;
@@ -92,7 +96,7 @@ img {
 
 .page-subtitle {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   margin-top: var(--space-2);
 }
 
@@ -173,14 +177,14 @@ img {
 }
 
 .product-body h2 {
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .product-description {
   color: var(--color-text-muted);
-  font-size: 0.88rem;
+  font-size: 0.83rem;
   flex: 1;
 }
 
@@ -194,7 +198,7 @@ img {
 }
 
 .product-price {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -261,9 +265,9 @@ button:focus-visible {
 .btn-primary,
 .btn-secondary {
   width: 100%;
-  padding: 14px 18px;
-  font-size: 1rem;
-  min-height: 48px;
+  padding: 0 18px;
+  font-size: 0.95rem;
+  min-height: var(--control-height);
 }
 
 .btn-primary {
@@ -283,9 +287,9 @@ button:focus-visible {
 
 .btn-compact {
   width: auto;
-  padding: 11px 18px;
-  font-size: 0.9rem;
-  min-height: 44px;
+  padding: 0 16px;
+  font-size: 0.88rem;
+  min-height: 40px;
 }
 
 button:disabled {
@@ -384,14 +388,14 @@ button:disabled {
 
 .modal-header h2,
 .sheet-header h2 {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .modal-subtitle {
   color: var(--color-text-muted);
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   margin-top: 2px;
 }
 
@@ -399,8 +403,8 @@ button:disabled {
    única salida y se iba de pantalla. */
 .close-btn {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--color-bg);
   color: var(--color-text);
@@ -443,7 +447,7 @@ button:disabled {
 }
 
 .field-label {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
@@ -454,7 +458,7 @@ button:disabled {
 
 .checkout-form input {
   width: 100%;
-  padding: 13px 14px;
+  padding: 0 12px;
   border: 1.5px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   font-family: inherit;
@@ -509,7 +513,7 @@ button:disabled {
    CVC en la misma fila. */
 .checkout-form input,
 .checkout-form select {
-  height: 48px;
+  height: var(--control-height);
   line-height: 1.2;
 }
 
@@ -563,8 +567,8 @@ button:disabled {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 52px;
-  height: 34px;
+  width: 44px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -751,7 +755,7 @@ button:disabled {
 }
 
 .summary-row--total .summary-row__value {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -804,13 +808,13 @@ button:disabled {
 }
 
 .result-icon {
-  width: 76px;
-  height: 76px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.1rem;
+  font-size: 1.75rem;
   font-weight: 800;
   margin-bottom: var(--space-2);
 }
@@ -831,7 +835,7 @@ button:disabled {
 }
 
 .result-screen h1 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
