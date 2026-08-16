@@ -9,11 +9,30 @@ function formatCOP(cents) {
   }).format(cents / 100);
 }
 
+// Nombres en español y con una explicación corta: "fee base" no le dice nada a
+// quien está comprando.
+const LINE_ITEMS = [
+  {
+    key: 'productAmount',
+    label: 'Subtotal del producto',
+    hint: 'Precio por la cantidad que elegiste',
+  },
+  {
+    key: 'baseFee',
+    label: 'Costo de servicio',
+    hint: 'Procesamiento seguro del pago',
+  },
+  {
+    key: 'deliveryFee',
+    label: 'Costo de envío',
+    hint: 'Entrega a la dirección que registraste',
+  },
+];
+
 export default function SummaryBackdrop() {
   const dispatch = useDispatch();
-  const { transaction, selectedProduct, cardData, loading, error } = useSelector(
-    (s) => s.checkout,
-  );
+  const { transaction, selectedProduct, quantity, deliveryData, cardData, loading, error } =
+    useSelector((s) => s.checkout);
 
   if (!transaction) return null;
 
@@ -28,47 +47,81 @@ export default function SummaryBackdrop() {
     >
       <div className="backdrop-sheet" role="dialog" aria-modal="true">
         <header className="sheet-header">
-          <h2>Resumen de tu compra</h2>
-          {selectedProduct && <p className="modal-subtitle">{selectedProduct.name}</p>}
+          <div>
+            <h2>Resumen de tu compra</h2>
+            <p className="modal-subtitle">Revisa antes de pagar</p>
+          </div>
         </header>
 
-        <div className="summary-rows">
-          <div className="summary-row">
-            <span>Producto</span>
-            <span>{formatCOP(transaction.productAmount)}</span>
+        <div className="sheet-body">
+          {selectedProduct && (
+            <div className="summary-product">
+              {selectedProduct.imageUrl && (
+                <img
+                  className="summary-product__image"
+                  src={selectedProduct.imageUrl}
+                  alt={selectedProduct.name}
+                />
+              )}
+              <div className="summary-product__info">
+                <h3>{selectedProduct.name}</h3>
+                <p className="summary-product__meta">
+                  {quantity} {quantity === 1 ? 'unidad' : 'unidades'} ·{' '}
+                  {formatCOP(selectedProduct.price)} c/u
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="summary-rows">
+            {LINE_ITEMS.map((item) => (
+              <div className="summary-row" key={item.key}>
+                <span className="summary-row__label">
+                  {item.label}
+                  <small>{item.hint}</small>
+                </span>
+                <span className="summary-row__value">{formatCOP(transaction[item.key])}</span>
+              </div>
+            ))}
+
+            <div className="summary-row summary-row--total">
+              <span className="summary-row__label">Total a pagar</span>
+              <span className="summary-row__value">{formatCOP(transaction.totalAmount)}</span>
+            </div>
           </div>
-          <div className="summary-row">
-            <span>Fee base</span>
-            <span>{formatCOP(transaction.baseFee)}</span>
-          </div>
-          <div className="summary-row">
-            <span>Fee de entrega</span>
-            <span>{formatCOP(transaction.deliveryFee)}</span>
-          </div>
-          <div className="summary-row summary-row--total">
-            <span>Total</span>
-            <span>{formatCOP(transaction.totalAmount)}</span>
-          </div>
+
+          <dl className="summary-meta">
+            {lastFour && (
+              <div>
+                <dt>Pagas con</dt>
+                <dd>Tarjeta terminada en {lastFour}</dd>
+              </div>
+            )}
+            {deliveryData?.address && (
+              <div>
+                <dt>Enviamos a</dt>
+                <dd>
+                  {deliveryData.address}
+                  {deliveryData.city ? `, ${deliveryData.city}` : ''}
+                  {deliveryData.region ? `, ${deliveryData.region}` : ''}
+                </dd>
+              </div>
+            )}
+          </dl>
+
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          {loading && (
+            <p className="summary-hint">
+              Estamos confirmando el pago con el proveedor. Puede tardar unos segundos,
+              no cierres esta pantalla.
+            </p>
+          )}
         </div>
-
-        {lastFour && (
-          <p className="summary-card-note">
-            Se cobrará a la tarjeta terminada en <strong>{lastFour}</strong>
-          </p>
-        )}
-
-        {error && (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        )}
-
-        {loading && (
-          <p className="summary-hint">
-            Estamos confirmando el pago con el proveedor. Puede tardar unos segundos,
-            no cierres esta pantalla.
-          </p>
-        )}
 
         <div className="sheet-actions">
           <button
@@ -76,7 +129,7 @@ export default function SummaryBackdrop() {
             onClick={() => dispatch(confirmPayment())}
             disabled={loading}
           >
-            {loading ? 'Procesando pago...' : 'Pagar ahora'}
+            {loading ? 'Procesando pago...' : `Pagar ${formatCOP(transaction.totalAmount)}`}
           </button>
           <button
             className="btn-secondary"
