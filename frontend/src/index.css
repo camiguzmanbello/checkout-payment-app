@@ -484,6 +484,78 @@ button:disabled {
   box-shadow: 0 0 0 3px rgba(209, 58, 52, 0.16);
 }
 
+/* Selects: el navegador dibuja su propia flecha y no se puede estilar, así que
+   se oculta y se pinta una con el mismo lenguaje visual de los inputs. */
+.select-wrap {
+  position: relative;
+  display: block;
+}
+
+.select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* Misma altura y tipografía que los inputs: al quitarle la apariencia nativa,
+   el select la calcula distinto en cada navegador y quedaba desalineado con el
+   CVC en la misma fila. */
+.checkout-form input,
+.checkout-form select {
+  height: 48px;
+  line-height: 1.2;
+}
+
+.checkout-form select {
+  width: 100%;
+  min-width: 0;
+  padding: 0 30px 0 12px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 16px; /* 16px evita el zoom de iOS al enfocar */
+  font-weight: 500;
+  background: var(--color-surface);
+  color: var(--color-text);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  /* Sin esto, un nombre largo como "Norte de Santander" se corta a la mitad. */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* El texto del placeholder se ve como tal, no como un valor ya elegido. */
+.checkout-form select.is-placeholder {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.checkout-form select:focus {
+  outline: none;
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 3px rgba(186, 255, 41, 0.45);
+}
+
+.checkout-form select:disabled {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.field--invalid select {
+  border-color: var(--color-danger);
+}
+
 /* El icono va dentro del campo, no en una línea aparte: antes era un
    inline-block dentro de un flex en columna y se estiraba a todo el ancho. */
 .card-brand {
@@ -507,10 +579,38 @@ button:disabled {
   padding-right: 62px;
 }
 
+/* En un teléfono de 375px la fila útil son ~343px. Tres columnas dejaban cada
+   control en ~109px, y un select con su flecha se queda sin espacio para el
+   texto. Por eso en móvil son dos columnas y el tercer campo baja completo. */
 .inline-fields {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
+}
+
+.inline-fields > .field:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 430px) {
+  .inline-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .inline-fields > .field:nth-child(3) {
+    grid-column: auto;
+  }
+}
+
+/* Departamento y ciudad llevan nombres largos: uno por fila en móvil. */
+.inline-fields--halves {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 560px) {
+  .inline-fields--halves {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .field-error {
@@ -579,6 +679,10 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+.backdrop-sheet .form-error {
+  margin: var(--space-3) var(--space-4) 0;
 }
 
 .backdrop-sheet .form-error {

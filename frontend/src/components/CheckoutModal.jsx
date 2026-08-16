@@ -13,7 +13,11 @@ import {
   cvcLengthFor,
   validateField,
   validateForm,
+  EXPIRY_MONTHS,
+  expiryYears,
+  isMonthUnavailable,
 } from '../utils/cardValidation';
+import { DEPARTMENT_NAMES, citiesOf } from '../utils/colombia';
 import CardBrandIcon from './CardBrandIcon';
 
 const EMPTY_FORM = {
@@ -35,16 +39,14 @@ const EMPTY_FORM = {
 const SANITIZERS = {
   cardNumber: (v) => formatCardNumber(v),
   cardHolder: (v) => v.replace(/[^a-zA-ZÀ-ÿ\s]/g, '').slice(0, 100),
-  expMonth: (v) => v.replace(/\D/g, '').slice(0, 2),
-  expYear: (v) => v.replace(/\D/g, '').slice(0, 2),
   cvc: (v) => v.replace(/\D/g, '').slice(0, 4),
   fullName: (v) => v.replace(/[^a-zA-ZÀ-ÿ\s]/g, '').slice(0, 100),
   email: (v) => v.replace(/\s/g, '').slice(0, 150),
   phone: (v) => v.replace(/[^\d+]/g, '').slice(0, 15),
   address: (v) => v.slice(0, 200),
-  city: (v) => v.replace(/[^a-zA-ZÀ-ÿ\s]/g, '').slice(0, 80),
-  region: (v) => v.replace(/[^a-zA-ZÀ-ÿ\s]/g, '').slice(0, 80),
 };
+
+const YEARS = expiryYears();
 
 export default function CheckoutModal() {
   const dispatch = useDispatch();
@@ -75,19 +77,26 @@ export default function CheckoutModal() {
   const errorFor = (field) =>
     (touched[field] || submitted) && errors[field] ? errors[field] : null;
 
-  const update = (field) => (e) => {
-    const sanitize = SANITIZERS[field] ?? ((v) => v);
-    const value = sanitize(e.target.value);
-    setForm((f) => ({ ...f, [field]: value }));
-
-    // Si el campo ya estaba marcado en error, revalidarlo en vivo permite ver
-    // el momento exacto en que queda correcto.
-    if (touched[field]) {
-      setTouched((t) => ({ ...t, [field]: true }));
-    }
+  const setValue = (fieldName, value) => {
+    setForm((f) => {
+      const next = { ...f, [fieldName]: value };
+      // Cambiar de departamento invalida la ciudad elegida antes.
+      if (fieldName === 'region') next.city = '';
+      // Si el año pasa a ser el actual, un mes ya vencido deja de ser válido.
+      if (fieldName === 'expYear' && isMonthUnavailable(f.expMonth, value)) {
+        next.expMonth = '';
+      }
+      return next;
+    });
   };
 
-  const blur = (field) => () => setTouched((t) => ({ ...t, [field]: true }));
+  const update = (fieldName) => (e) => {
+    const sanitize = SANITIZERS[fieldName] ?? ((v) => v);
+    setValue(fieldName, sanitize(e.target.value));
+  };
+
+  const blur = (fieldName) => () =>
+    setTouched((t) => ({ ...t, [fieldName]: true }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -102,7 +111,7 @@ export default function CheckoutModal() {
       setCardData({
         number: form.cardNumber,
         cvc: form.cvc,
-        expMonth: form.expMonth.padStart(2, '0'),
+        expMonth: form.expMonth,
         expYear: form.expYear,
         cardHolder: form.cardHolder,
       }),
@@ -134,7 +143,7 @@ export default function CheckoutModal() {
 
   if (!selectedProduct) return null;
 
-  const field = (name, label, inputProps = {}, extra = null) => {
+  const wrap = (name, label, control, extra = null) => {
     const fieldError = errorFor(name);
     const classes = [
       'field',
@@ -148,14 +157,7 @@ export default function CheckoutModal() {
       <label className={classes}>
         <span className="field-label">{label}</span>
         <span className="input-wrap">
-          <input
-            name={name}
-            value={form[name]}
-            onChange={update(name)}
-            onBlur={blur(name)}
-            aria-invalid={Boolean(fieldError)}
-            {...inputProps}
-          />
+          {control}
           {extra}
         </span>
         {fieldError && (
@@ -167,7 +169,51 @@ export default function CheckoutModal() {
     );
   };
 
+  const input = (name, label, inputProps = {}, extra = null) =>
+    wrap(
+      name,
+      label,
+      <input
+        name={name}
+        value={form[name]}
+        onChange={update(name)}
+        onBlur={blur(name)}
+        aria-invalid={Boolean(errorFor(name))}
+        {...inputProps}
+      />,
+      extra,
+    );
+
+  const select = (name, label, options, { placeholder, disabled } = {}) =>
+    wrap(
+      name,
+      label,
+      <span className="select-wrap">
+        <select
+          name={name}
+          className={form[name] ? '' : 'is-placeholder'}
+          value={form[name]}
+          onChange={update(name)}
+          onBlur={blur(name)}
+          aria-invalid={Boolean(errorFor(name))}
+          disabled={disabled}
+        >
+          <option value="">{placeholder}</option>
+          {options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              disabled={option.disabled}
+            >
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </span>,
+    );
+
   const cvcDigits = cvcLengthFor(brand);
+  const cities = citiesOf(form.region);
 
   return (
     <div
@@ -182,12 +228,7 @@ export default function CheckoutModal() {
             <h2>Pagar con tarjeta</h2>
             <p className="modal-subtitle">{selectedProduct.name}</p>
           </div>
-          <button
-            type="button"
-            className="close-btn"
-            onClick={close}
-            aria-label="Cerrar"
-          >
+          <button type="button" className="close-btn" onClick={close} aria-label="Cerrar">
             ✕
           </button>
         </header>
@@ -196,7 +237,7 @@ export default function CheckoutModal() {
           <fieldset>
             <legend>Tarjeta de crédito</legend>
 
-            {field(
+            {input(
               'cardNumber',
               'Número de tarjeta',
               {
@@ -208,25 +249,28 @@ export default function CheckoutModal() {
               <CardBrandIcon brand={brand} />,
             )}
 
-            {field('cardHolder', 'Nombre en la tarjeta', {
+            {input('cardHolder', 'Nombre en la tarjeta', {
               autoComplete: 'cc-name',
               placeholder: 'Como aparece en la tarjeta',
             })}
 
             <div className="inline-fields">
-              {field('expMonth', 'Mes', {
-                inputMode: 'numeric',
-                autoComplete: 'cc-exp-month',
-                maxLength: 2,
-                placeholder: 'MM',
-              })}
-              {field('expYear', 'Año', {
-                inputMode: 'numeric',
-                autoComplete: 'cc-exp-year',
-                maxLength: 2,
-                placeholder: 'AA',
-              })}
-              {field('cvc', 'CVC', {
+              {select(
+                'expMonth',
+                'Mes',
+                EXPIRY_MONTHS.map((month) => ({
+                  ...month,
+                  disabled: isMonthUnavailable(month.value, form.expYear),
+                })),
+                { placeholder: 'MM' },
+              )}
+              {select(
+                'expYear',
+                'Año',
+                YEARS.map((year) => ({ value: year, label: `20${year}` })),
+                { placeholder: 'AA' },
+              )}
+              {input('cvc', 'CVC', {
                 inputMode: 'numeric',
                 autoComplete: 'cc-csc',
                 maxLength: cvcDigits ?? 4,
@@ -238,22 +282,38 @@ export default function CheckoutModal() {
           <fieldset>
             <legend>Datos de entrega</legend>
 
-            {field('fullName', 'Nombre completo', { autoComplete: 'name' })}
-            {field('email', 'Email', {
+            {input('fullName', 'Nombre completo', { autoComplete: 'name' })}
+            {input('email', 'Email', {
               type: 'email',
               autoComplete: 'email',
               placeholder: 'tucorreo@dominio.com',
             })}
-            {field('phone', 'Teléfono', {
+            {input('phone', 'Teléfono', {
               inputMode: 'tel',
               autoComplete: 'tel',
               placeholder: '+57 300 000 0000',
             })}
-            {field('address', 'Dirección', { autoComplete: 'street-address' })}
+            {input('address', 'Dirección', {
+              autoComplete: 'street-address',
+              placeholder: 'Calle 100 #15-20 Apto 401',
+            })}
 
-            <div className="inline-fields">
-              {field('city', 'Ciudad', { autoComplete: 'address-level2' })}
-              {field('region', 'Departamento', { autoComplete: 'address-level1' })}
+            <div className="inline-fields inline-fields--halves">
+              {select(
+                'region',
+                'Departamento',
+                DEPARTMENT_NAMES.map((name) => ({ value: name, label: name })),
+                { placeholder: 'Elige tu departamento' },
+              )}
+              {select(
+                'city',
+                'Ciudad',
+                cities.map((name) => ({ value: name, label: name })),
+                {
+                  placeholder: form.region ? 'Elige tu ciudad' : 'Elige antes el departamento',
+                  disabled: !form.region,
+                },
+              )}
             </div>
           </fieldset>
 
