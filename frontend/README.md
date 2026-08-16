@@ -229,7 +229,14 @@ cannot be parsed by Jest.
 Card data (`cardData`) lives only in memory (Redux) and is explicitly excluded
 from what gets persisted to localStorage. If the buyer refreshes halfway through
 the form they get product, customer and delivery back, but have to type the card
-again. The summary only ever shows the last four digits.
+again. Nothing about the card reaches the database either: the `Transaction`
+model holds amounts, status and relations, and no card field at all.
+
+The card drawn on the summary shows the brand, the holder and the last four
+digits. The expiry is masked as `••/••` on purpose: on its own it charges
+nothing, but alongside a number obtained elsewhere it is what completes a
+card-not-present purchase, and that screen stays visible while the charge
+settles. The CVC is drawn nowhere, exactly as on a real card.
 
 ## Still pending
 
