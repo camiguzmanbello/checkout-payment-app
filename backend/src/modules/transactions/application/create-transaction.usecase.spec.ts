@@ -20,7 +20,7 @@ describe('CreateTransactionUseCase', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('falla si el producto no existe', async () => {
+  it('fails when the product does not exist', async () => {
     mockProductRepo.findById.mockResolvedValue(null);
 
     const result = await useCase.execute({
@@ -34,7 +34,7 @@ describe('CreateTransactionUseCase', () => {
     if (result.isFailure) expect(result.error).toBe('PRODUCT_NOT_FOUND');
   });
 
-  it('falla si no hay stock suficiente', async () => {
+  it('fails when there is not enough stock', async () => {
     mockProductRepo.findById.mockResolvedValue(
       new Product('p1', 'Test', 'desc', 10000, 1, null),
     );
@@ -50,7 +50,7 @@ describe('CreateTransactionUseCase', () => {
     if (result.isFailure) expect(result.error).toBe('INSUFFICIENT_STOCK');
   });
 
-  it('crea la transacción PENDING con los montos correctos', async () => {
+  it('creates the PENDING transaction with the right amounts', async () => {
     mockProductRepo.findById.mockResolvedValue(
       new Product('p1', 'Test', 'desc', 10000, 5, null),
     );
