@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Checkout">
+  <rect width="64" height="64" rx="14" fill="#10120f"/>
+  <path
+    d="M16 24h32l-3.2 26.4A4 4 0 0 1 40.8 54H23.2a4 4 0 0 1-4-3.6z"
+    fill="#baff29"
+  />
+  <path
+    d="M24 26v-6a8 8 0 0 1 16 0v6"
+    fill="none"
+    stroke="#baff29"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+  <rect x="24" y="34" width="16" height="11" rx="2" fill="#10120f"/>
+  <rect x="24" y="37" width="16" height="2.6" fill="#baff29"/>
+</svg>
