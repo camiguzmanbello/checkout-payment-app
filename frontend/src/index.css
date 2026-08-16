@@ -556,27 +556,48 @@ button:disabled {
   border-color: var(--color-danger);
 }
 
-/* El icono va dentro del campo, no en una línea aparte: antes era un
-   inline-block dentro de un flex en columna y se estiraba a todo el ancho. */
+/* Ficha de la marca: dentro del campo, con fondo y borde propios para que se
+   lea como una tarjeta y no como un sello pegado al texto. */
 .card-brand {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 14px;
-  display: block;
+  width: 52px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 7px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
   pointer-events: none;
+  transition: border-color 0.18s ease, transform 0.18s ease;
 }
 
 .card-brand svg {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: block;
 }
 
+/* Cuando se reconoce la marca, la ficha se marca con el acento del diseño. */
+.card-brand--visa,
+.card-brand--mastercard,
+.card-brand--amex {
+  border-color: var(--color-text);
+  transform: translateY(-50%) scale(1.04);
+}
+
+.card-brand--empty {
+  color: var(--color-border-strong);
+  background: var(--color-bg);
+}
+
 .field--with-icon input {
-  padding-right: 62px;
+  padding-right: 70px;
 }
 
 /* En un teléfono de 375px la fila útil son ~343px. Tres columnas dejaban cada
