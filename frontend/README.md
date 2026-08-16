@@ -244,5 +244,6 @@ settles. The CVC is drawn nowhere, exactly as on a real card.
       keyboard navigation)
 - [ ] Review the flow with a screen reader; the roles are in place but it has
       not been tried with a real one
-- [ ] Show a clearer waiting state while the charge settles, which today can
-      keep the request open for several seconds
+- [ ] Stop holding the request open while the charge settles. The card pulses
+      and the sheet explains the wait, but the call still blocks for seconds:
+      the real fix is the backend answering `202` and the frontend polling
