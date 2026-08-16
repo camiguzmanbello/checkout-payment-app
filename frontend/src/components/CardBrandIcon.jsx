@@ -1,48 +1,63 @@
 // Marcas dibujadas en SVG inline: sin peticiones de red, nítidas en cualquier
-// densidad y con el tamaño exacto que necesita el campo. Van dentro de una
-// ficha con borde para que se lean como una tarjeta y no como un adorno suelto.
+// densidad y con el tamaño exacto que necesita el campo. Cada una lleva el
+// rasgo que la hace reconocible de un vistazo — el subrayado naranja de Visa,
+// los dos círculos de MasterCard, el recuadro azul de Amex — porque a este
+// tamaño el nombre solo no alcanza para distinguirlas.
 const LOGOS = {
   visa: (
-    <svg viewBox="0 0 40 14" role="img" aria-label="Visa">
+    <svg viewBox="0 0 56 22" role="img" aria-label="Visa">
       <text
-        x="20"
-        y="11.5"
+        x="28"
+        y="15.5"
         textAnchor="middle"
         fontFamily="Georgia, 'Times New Roman', serif"
-        fontSize="12"
+        fontSize="16"
         fontStyle="italic"
         fontWeight="700"
-        letterSpacing="0.5"
+        letterSpacing="0.6"
         fill="#1a1f71"
       >
         VISA
       </text>
+      <path d="M10 19h36l-3 2.6H13Z" fill="#f7a600" />
     </svg>
   ),
   mastercard: (
-    <svg viewBox="0 0 40 14" role="img" aria-label="MasterCard">
-      <circle cx="16" cy="7" r="6.2" fill="#eb001b" />
-      <circle cx="24" cy="7" r="6.2" fill="#f79e1b" />
+    <svg viewBox="0 0 56 22" role="img" aria-label="MasterCard">
+      <circle cx="22" cy="11" r="9.4" fill="#eb001b" />
+      <circle cx="34" cy="11" r="9.4" fill="#f79e1b" />
       <path
-        d="M20 2.2a6.2 6.2 0 0 0 0 9.6 6.2 6.2 0 0 0 0-9.6Z"
+        d="M28 3.7a9.4 9.4 0 0 0 0 14.6 9.4 9.4 0 0 0 0-14.6Z"
         fill="#ff5f00"
       />
     </svg>
   ),
   amex: (
-    <svg viewBox="0 0 40 14" role="img" aria-label="American Express">
-      <rect width="40" height="14" rx="2.5" fill="#2e77bc" />
+    <svg viewBox="0 0 56 22" role="img" aria-label="American Express">
+      <rect width="56" height="22" rx="3" fill="#016fd0" />
       <text
-        x="20"
-        y="10"
+        x="28"
+        y="12.2"
         textAnchor="middle"
         fontFamily="Arial, Helvetica, sans-serif"
-        fontSize="7"
+        fontSize="7.6"
         fontWeight="700"
-        letterSpacing="0.4"
+        letterSpacing="0.6"
         fill="#ffffff"
       >
-        AMEX
+        AMERICAN
+      </text>
+      <text
+        x="28"
+        y="19.4"
+        textAnchor="middle"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="7.6"
+        fontWeight="700"
+        letterSpacing="0.6"
+        fill="#ffffff"
+      >
+        EXPRESS
       </text>
     </svg>
   ),
@@ -51,18 +66,18 @@ const LOGOS = {
 // Sin marca todavía: contorno de tarjeta en gris, para que el espacio no salte
 // cuando aparezca el logo real.
 const PLACEHOLDER = (
-  <svg viewBox="0 0 40 14" role="img" aria-label="Tarjeta">
+  <svg viewBox="0 0 56 22" role="img" aria-label="Tarjeta">
     <rect
-      x="0.6"
-      y="0.6"
-      width="38.8"
-      height="12.8"
-      rx="2.4"
+      x="0.8"
+      y="0.8"
+      width="54.4"
+      height="20.4"
+      rx="3"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.2"
+      strokeWidth="1.6"
     />
-    <rect x="0.6" y="3.6" width="38.8" height="2.4" fill="currentColor" opacity="0.35" />
+    <rect x="0.8" y="5.2" width="54.4" height="3.4" fill="currentColor" opacity="0.35" />
   </svg>
 );
 

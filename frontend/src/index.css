@@ -1251,13 +1251,13 @@ button:disabled {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 28px;
+  width: 56px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
-  border-radius: 7px;
+  padding: 0 6px;
+  border-radius: 8px;
   /* Siempre clara: los logos de las marcas son oscuros y sobre un fondo
      oscuro desaparecerían. */
   background: #ffffff;
@@ -1287,7 +1287,7 @@ button:disabled {
 }
 
 .field--with-icon input {
-  padding-right: 70px;
+  padding-right: 82px;
 }
 
 /* En un teléfono de 375px la fila útil son ~343px. Tres columnas dejaban cada
