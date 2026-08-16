@@ -12,7 +12,7 @@ las enlaza, así que aparecen solas en cuanto existan.
 | `05-resumen.png` | El resumen con la tarjeta dibujada y el desglose |
 | `06-aprobado.png` | La pantalla de pago aprobado |
 | `07-rechazado.png` | La pantalla de pago rechazado |
-| `08-modo-oscuro.png` | Cualquier pantalla en modo oscuro |
+| `08-modo-claro.png` | Cualquier pantalla en modo claro |
 | `09-swagger.png` | La documentación de la API en `/api-docs` |
 
 Recomendaciones: PNG, ancho de 1400px para las de escritorio y 750px para las de

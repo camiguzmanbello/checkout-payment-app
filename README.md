@@ -4,7 +4,7 @@ Una tienda con pago real: eliges un producto, ingresas tu tarjeta y tus datos de
 entrega, confirmas y el cobro se procesa contra la pasarela de pagos. El stock
 baja únicamente cuando el cobro queda aprobado.
 
-Prueba técnica desarrollada por **María Camila Guzmán Bello**.
+
 
 ---
 
@@ -72,9 +72,9 @@ propio botón.
 
 ![Pago rechazado](docs/screenshots/07-rechazado.png)
 
-### Modo oscuro
+### Modo claro
 
-![Modo oscuro](docs/screenshots/08-modo-oscuro.png)
+![Modo claro](docs/screenshots/08-modo-claro.png)
 
 ### Documentación de la API
 
