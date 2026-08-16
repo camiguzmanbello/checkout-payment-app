@@ -11,6 +11,7 @@ import {
   detectCardBrand,
   formatCardNumber,
   cvcLengthFor,
+  isValidCardNumber,
   validateField,
   validateForm,
   EXPIRY_MONTHS,
@@ -72,10 +73,18 @@ export default function CheckoutModal() {
   const errors = validateForm(form);
   const formValid = Object.keys(errors).length === 0;
 
+  // El resto de la tarjeta espera al número: hasta que no se sepa la marca no
+  // se sabe cuántos dígitos pedir de CVC ni qué tarjeta se está cobrando.
+  const cardReady = isValidCardNumber(form.cardNumber) && brand !== 'unknown';
+  const LOCKED_UNTIL_CARD = ['cardHolder', 'expMonth', 'expYear', 'cvc'];
+
   // El error aparece apenas el campo pierde el foco o al intentar enviar, no
-  // después de haber llenado todo el formulario.
-  const errorFor = (field) =>
-    (touched[field] || submitted) && errors[field] ? errors[field] : null;
+  // después de haber llenado todo el formulario. Un campo todavía bloqueado no
+  // reclama nada: no es culpa de quien compra que aún no pueda llenarlo.
+  const errorFor = (field) => {
+    if (!cardReady && LOCKED_UNTIL_CARD.includes(field)) return null;
+    return (touched[field] || submitted) && errors[field] ? errors[field] : null;
+  };
 
   const setValue = (fieldName, value) => {
     setForm((f) => {
@@ -249,9 +258,16 @@ export default function CheckoutModal() {
               <CardBrandIcon brand={brand} />,
             )}
 
+            {!cardReady && (
+              <p className="field-hint">
+                Escribe el número completo para habilitar el resto de los datos.
+              </p>
+            )}
+
             {input('cardHolder', 'Nombre en la tarjeta', {
               autoComplete: 'cc-name',
               placeholder: 'Como aparece en la tarjeta',
+              disabled: !cardReady,
             })}
 
             <div className="inline-fields">
@@ -262,19 +278,20 @@ export default function CheckoutModal() {
                   ...month,
                   disabled: isMonthUnavailable(month.value, form.expYear),
                 })),
-                { placeholder: 'MM' },
+                { placeholder: 'MM', disabled: !cardReady },
               )}
               {select(
                 'expYear',
                 'Año',
                 YEARS.map((year) => ({ value: year, label: `20${year}` })),
-                { placeholder: 'AA' },
+                { placeholder: 'AA', disabled: !cardReady },
               )}
-              {input('cvc', 'CVC', {
+              {input('cvc', `CVC${cardReady && cvcDigits ? ` (${cvcDigits} dígitos)` : ''}`, {
                 inputMode: 'numeric',
                 autoComplete: 'cc-csc',
                 maxLength: cvcDigits ?? 4,
                 placeholder: cvcDigits === 4 ? '1234' : '123',
+                disabled: !cardReady,
               })}
             </div>
           </fieldset>
