@@ -1,0 +1,24 @@
+# Local development database only. These credentials are throwaway and are not
+# used by any deployed environment — the real DATABASE_URL lives in .env.
+# Published on 5433 to avoid colliding with a Postgres already installed on 5432.
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: checkout-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: checkout
+      POSTGRES_PASSWORD: checkout_local_dev
+      POSTGRES_DB: checkout_db
+    ports:
+      - '5433:5432'
+    volumes:
+      - checkout-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U checkout -d checkout_db']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  checkout-pgdata:

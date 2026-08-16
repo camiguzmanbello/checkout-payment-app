@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2021",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "strict": false,
+    // Required for the Result<T, E> discriminated union: narrowing on the
+    // boolean literal discriminants (isSuccess / isFailure) only works when
+    // strictNullChecks is on. Without it, `result.value` after an isFailure
+    // guard fails to compile.
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
