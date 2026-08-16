@@ -228,6 +228,39 @@ describe('CheckoutModal', () => {
     expect(valueOf('region')).toBe('Amazonas');
   });
 
+  it('jumps to the option matching what is typed, like the native select did', () => {
+    renderModal();
+
+    const control = controlOf('region');
+    fireEvent.keyDown(control, { key: 'c' });
+
+    const active = () =>
+      [...document.querySelectorAll('[role="option"]')].find((o) =>
+        o.className.includes('is-active'),
+      );
+    expect(active().textContent).toBe('Caldas');
+
+    // Seguir escribiendo afina la búsqueda dentro de la misma secuencia.
+    fireEvent.keyDown(control, { key: 'a' });
+    fireEvent.keyDown(control, { key: 'u' });
+    expect(active().textContent).toBe('Cauca');
+
+    fireEvent.keyDown(control, { key: 'Enter' });
+    expect(valueOf('region')).toBe('Cauca');
+  });
+
+  it('finds accented names typed without the accent', () => {
+    renderModal();
+
+    const control = controlOf('region');
+    fireEvent.keyDown(control, { key: 'q' });
+    fireEvent.keyDown(control, { key: 'u' });
+    fireEvent.keyDown(control, { key: 'i' });
+    fireEvent.keyDown(control, { key: 'Enter' });
+
+    expect(valueOf('region')).toBe('Quindío');
+  });
+
   it('closes when clicking the backdrop', () => {
     const { store, container } = renderModal();
 

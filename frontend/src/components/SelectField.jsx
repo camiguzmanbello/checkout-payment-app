@@ -17,6 +17,8 @@ export default function SelectField({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const rootRef = useRef(null);
+  const listRef = useRef(null);
+  const typed = useRef({ text: '', at: 0 });
   const listId = useId();
 
   const selected = options.find((option) => option.value === value);
@@ -42,6 +44,42 @@ export default function SelectField({
       if (selectable(next)) break;
     }
     setActiveIndex(next);
+  };
+
+  // Búsqueda al teclear, como hacía el select nativo: escribir "c" salta a
+  // Caldas y seguir con "au" afina a Cauca. La secuencia se reinicia al segundo.
+  const TYPEAHEAD_MS = 1000;
+
+  const normalize = (text) =>
+    text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, ''); // "Quindío" debe encontrarse con "qui"
+
+  const typeahead = (char) => {
+    const now = Date.now();
+    const query =
+      now - typed.current.at > TYPEAHEAD_MS ? char : typed.current.text + char;
+    typed.current = { text: query, at: now };
+
+    const needle = normalize(query);
+    let index = options.findIndex(
+      (option, i) => selectable(i) && normalize(String(option.label)).startsWith(needle),
+    );
+
+    // Repetir la misma letra recorre las opciones que empiezan por ella.
+    if (index === -1 && query.length > 1 && new Set(query).size === 1) {
+      typed.current = { text: char, at: now };
+      index = options.findIndex(
+        (option, i) =>
+          selectable(i) && normalize(String(option.label)).startsWith(normalize(char)),
+      );
+    }
+
+    if (index === -1) return;
+
+    setActiveIndex(index);
+    if (!open) setOpen(true);
   };
 
   // Cerrar al tocar fuera: sin esto la lista se queda abierta encima del resto
@@ -86,8 +124,25 @@ export default function SelectField({
       return;
     }
 
-    if (e.key === 'Tab' && open) close();
+    if (e.key === 'Tab' && open) {
+      close();
+      return;
+    }
+
+    // Cualquier carácter imprimible alimenta la búsqueda.
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      typeahead(e.key);
+    }
   };
+
+  // La opción activa siempre visible: sin esto la búsqueda encuentra el
+  // departamento pero se queda fuera del área con scroll.
+  useEffect(() => {
+    if (!open || activeIndex < 0) return;
+    const node = listRef.current?.children[activeIndex];
+    node?.scrollIntoView?.({ block: 'nearest' }); // jsdom no lo implementa
+  }, [open, activeIndex]);
 
   return (
     <span className="select" ref={rootRef}>
@@ -110,7 +165,7 @@ export default function SelectField({
       </button>
 
       {open && (
-        <ul className="select__list" role="listbox" id={listId}>
+        <ul className="select__list" role="listbox" id={listId} ref={listRef}>
           {options.map((option, index) => (
             <li
               key={option.value}
