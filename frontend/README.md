@@ -192,7 +192,7 @@ the suite is deterministic and runs in CI without a backend.
 | --- | --- |
 | Statements | 91.07% |
 | Lines | 93.15% |
-| Functions | 89.44% |
+| Functions | 89.37% |
 | Branches | 86.84% |
 
 What each suite covers:

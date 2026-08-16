@@ -152,7 +152,7 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-98 tests across 20 suites. No test reaches the network or the database: the
+102 tests across 20 suites. No test reaches the network or the database: the
 gateway is exercised with `fetch` mocked and the repositories with the Prisma
 client mocked, so the suite is deterministic and can run in CI without any
 credentials.
