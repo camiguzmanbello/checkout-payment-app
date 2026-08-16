@@ -472,11 +472,11 @@ img {
   z-index: -1;
   background: linear-gradient(
     to top,
-    rgba(10, 12, 9, 0.92) 0%,
-    rgba(10, 12, 9, 0.62) 32%,
-    rgba(10, 12, 9, 0.18) 58%,
-    rgba(10, 12, 9, 0.45) 88%,
-    rgba(10, 12, 9, 0.68) 100%
+    rgba(10, 12, 9, 0.68) 0%,
+    rgba(10, 12, 9, 0.34) 34%,
+    rgba(10, 12, 9, 0.06) 60%,
+    rgba(10, 12, 9, 0.3) 88%,
+    rgba(10, 12, 9, 0.5) 100%
   );
 }
 
@@ -488,26 +488,47 @@ img {
   margin: 0 auto;
 }
 
+/* Panel esmerilado con el borde apenas insinuado: da contraste al texto sin
+   tapar la foto, que es lo que hacía el velo pesado. */
+.carousel__panel {
+  display: inline-block;
+  max-width: 30rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(16, 18, 15, 0.42);
+  border: 1px solid rgba(245, 247, 242, 0.14);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+
+/* Sin backdrop-filter el panel se vería casi transparente: se compensa con un
+   fondo más sólido. */
+@supports not (backdrop-filter: blur(4px)) {
+  .carousel__panel {
+    background: rgba(16, 18, 15, 0.74);
+  }
+}
+
 .carousel__eyebrow {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .carousel__copy h2 {
-  font-size: clamp(1.3rem, 5vw, 1.9rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-size: clamp(1.05rem, 3.2vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
 .carousel__description {
-  font-size: 0.9rem;
-  opacity: 0.82;
-  margin-top: var(--space-2);
+  font-size: 0.82rem;
+  opacity: 0.72;
+  margin-top: var(--space-1);
   max-width: 42ch;
 }
 
@@ -520,9 +541,9 @@ img {
 }
 
 .carousel__price {
-  font-size: 1.35rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 /* Las flechas son de escritorio: en el teléfono se desliza. */

@@ -85,18 +85,22 @@ export default function FeaturedCarousel({ products, onBuy }) {
               <img src={product.imageUrl} alt={product.name} loading={i === 0 ? 'eager' : 'lazy'} />
             )}
             <div className="carousel__copy">
-              <p className="carousel__eyebrow">Destacado</p>
-              <h2>{product.name}</h2>
-              <p className="carousel__description">{product.description}</p>
-              <div className="carousel__actions">
-                <span className="carousel__price">{formatCOP(product.price)}</span>
-                <button
-                  className="btn-primary btn-compact"
-                  onClick={() => onBuy(product)}
-                  tabIndex={i === index ? 0 : -1}
-                >
-                  Comprar
-                </button>
+              {/* Panel esmerilado: la info se lee sin tener que apagar la foto
+                  con un velo pesado. */}
+              <div className="carousel__panel">
+                <p className="carousel__eyebrow">Destacado</p>
+                <h2>{product.name}</h2>
+                <p className="carousel__description">{product.description}</p>
+                <div className="carousel__actions">
+                  <span className="carousel__price">{formatCOP(product.price)}</span>
+                  <button
+                    className="btn-primary btn-compact"
+                    onClick={() => onBuy(product)}
+                    tabIndex={i === index ? 0 : -1}
+                  >
+                    Comprar
+                  </button>
+                </div>
               </div>
             </div>
           </article>
