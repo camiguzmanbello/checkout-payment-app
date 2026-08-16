@@ -22,7 +22,7 @@ describe('ProductPrismaRepository', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('maps every row to a Product entity', async () => {
+  it('maps every row to a Product entity, in a stable order', async () => {
     mockPrisma.product.findMany.mockResolvedValue([row]);
 
     const products = await repository.findAll();
@@ -30,6 +30,9 @@ describe('ProductPrismaRepository', () => {
     expect(products).toHaveLength(1);
     expect(products[0]).toBeInstanceOf(Product);
     expect(products[0].hasStockFor(5)).toBe(true);
+    expect(mockPrisma.product.findMany).toHaveBeenCalledWith({
+      orderBy: [{ createdAt: 'asc' }, { name: 'asc' }],
+    });
   });
 
   it('maps a single row to a Product entity', async () => {

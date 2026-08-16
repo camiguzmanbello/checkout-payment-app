@@ -8,7 +8,11 @@ export class ProductPrismaRepository implements ProductRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Product[]> {
-    const rows = await this.prisma.product.findMany();
+    // Stable order so the catalogue does not shuffle between reloads. Products
+    // seeded in the same batch share a timestamp, hence the name tiebreaker.
+    const rows = await this.prisma.product.findMany({
+      orderBy: [{ createdAt: 'asc' }, { name: 'asc' }],
+    });
     return rows.map(
       (r) =>
         new Product(r.id, r.name, r.description, r.price, r.stock, r.imageUrl),
