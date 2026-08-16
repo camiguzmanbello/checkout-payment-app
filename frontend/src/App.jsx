@@ -3,6 +3,7 @@ import ProductPage from './components/ProductPage';
 import CheckoutModal from './components/CheckoutModal';
 import SummaryBackdrop from './components/SummaryBackdrop';
 import FinalStatus from './components/FinalStatus';
+import ThemeToggle from './components/ThemeToggle';
 
 export default function App() {
   const step = useSelector((s) => s.checkout.step);
@@ -13,6 +14,7 @@ export default function App() {
   if (step === 'result') {
     return (
       <div className="app">
+        <ThemeToggle />
         <FinalStatus />
       </div>
     );
@@ -20,6 +22,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <ThemeToggle />
       <ProductPage />
       {step === 'checkout' && <CheckoutModal />}
       {step === 'summary' && <SummaryBackdrop />}

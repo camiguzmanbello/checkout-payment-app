@@ -6,7 +6,24 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <meta name="description" content="Compra en pocos pasos y paga con tarjeta." />
+    <!-- Pinta la barra del navegador acorde al tema activo -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f5f2" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f110e" />
     <title>Checkout App</title>
+    <script>
+      // Se aplica antes de pintar para que no haya un destello claro al entrar
+      // en modo oscuro.
+      (function () {
+        try {
+          var saved = localStorage.getItem('checkout_theme');
+          if (saved === 'light' || saved === 'dark') {
+            document.documentElement.dataset.theme = saved;
+          }
+        } catch (e) {
+          /* almacenamiento no disponible: se usa la preferencia del sistema */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

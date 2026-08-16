@@ -1,8 +1,16 @@
+/* Una sola paleta con dos temas. El acento lima es la marca y no cambia entre
+   modos: lo que cambia es el lienzo. En claro los botones principales son
+   negros con texto lima; en oscuro se invierten, porque lima sobre casi blanco
+   no se lee. */
 :root {
+  color-scheme: light;
+
   --color-bg: #f4f5f2;
   --color-surface: #ffffff;
+  --color-surface-soft: #eef0ea;
   --color-text: #10120f;
-  --color-text-muted: #6b7268;
+  --color-text-muted: #5f665c;
+  --color-placeholder: #9ba396;
   --color-accent: #baff29;
   --color-accent-dark: #8fd400;
   --color-danger: #d13a34;
@@ -11,7 +19,16 @@
   --color-warning-soft: #fdf3e2;
   --color-success: #1f9d55;
   --color-border: #e4e6df;
-  --color-border-strong: #d2d5cb;
+  --color-border-strong: #cfd3c8;
+
+  /* Par invertido: fondo fuerte + texto de contraste, usado por el botón
+     principal, las etiquetas sólidas y el icono de éxito. */
+  --color-invert-bg: #10120f;
+  --color-invert-fg: #baff29;
+
+  --shadow-sm: 0 1px 2px rgba(16, 18, 15, 0.04);
+  --shadow-md: 0 6px 24px rgba(16, 18, 15, 0.08);
+  --shadow-lg: 0 -8px 40px rgba(16, 18, 15, 0.18);
 
   --radius-lg: 22px;
   --radius-md: 14px;
@@ -29,11 +46,71 @@
      cómodo y se ve bastante menos pesado que los 48px anteriores. */
   --control-height: 44px;
 
-  --shadow-sm: 0 1px 2px rgba(16, 18, 15, 0.04);
-  --shadow-md: 0 6px 24px rgba(16, 18, 15, 0.08);
-  --shadow-lg: 0 -8px 40px rgba(16, 18, 15, 0.18);
-
   --content-max: 1120px;
+}
+
+/* Tema oscuro: por preferencia del sistema, salvo que se haya elegido claro. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    /* Gris neutro, no verdoso: el tinte oliva del fondo peleaba con el lima y
+       hacía ver la pantalla sucia. La superficie se separa del fondo lo
+       suficiente para que las tarjetas se lean como tarjetas. */
+    --color-bg: #131414;
+    --color-surface: #1c1e1d;
+    --color-surface-soft: #262928;
+    --color-text: #f2f3f1;
+    --color-text-muted: #a0a5a1;
+    --color-placeholder: #767a77;
+    --color-accent: #baff29;
+    --color-accent-dark: #cbff5e;
+    --color-danger: #ff8079;
+    --color-danger-soft: #2e1a19;
+    --color-warning: #efb85f;
+    --color-warning-soft: #2c2317;
+    --color-success: #58d68d;
+    --color-border: #2f3231;
+    --color-border-strong: #434745;
+
+    --color-invert-bg: #baff29;
+    --color-invert-fg: #10120f;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 -8px 40px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* Elección explícita desde el botón de tema. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+    /* Gris neutro, no verdoso: el tinte oliva del fondo peleaba con el lima y
+     hacía ver la pantalla sucia. La superficie se separa del fondo lo
+     suficiente para que las tarjetas se lean como tarjetas. */
+  --color-bg: #131414;
+  --color-surface: #1c1e1d;
+  --color-surface-soft: #262928;
+  --color-text: #f2f3f1;
+  --color-text-muted: #a0a5a1;
+  --color-placeholder: #767a77;
+  --color-accent: #baff29;
+  --color-accent-dark: #cbff5e;
+  --color-danger: #ff8079;
+  --color-danger-soft: #2e1a19;
+  --color-warning: #efb85f;
+  --color-warning-soft: #2c2317;
+  --color-success: #58d68d;
+  --color-border: #2f3231;
+  --color-border-strong: #434745;
+
+  --color-invert-bg: #baff29;
+  --color-invert-fg: #10120f;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 -8px 40px rgba(0, 0, 0, 0.55);
 }
 
 * {
@@ -160,12 +237,12 @@ img {
 
 .badge--accent {
   background: var(--color-accent);
-  color: var(--color-text);
+  color: #10120f;
 }
 
 .badge--muted {
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: var(--color-invert-bg);
+  color: var(--color-invert-fg);
 }
 
 .product-body {
@@ -217,7 +294,7 @@ img {
   background: linear-gradient(
     90deg,
     var(--color-border) 25%,
-    #eef0ea 37%,
+    var(--color-surface-soft) 37%,
     var(--color-border) 63%
   );
   background-size: 400% 100%;
@@ -271,8 +348,8 @@ button:focus-visible {
 }
 
 .btn-primary {
-  background: var(--color-text);
-  color: var(--color-accent);
+  background: var(--color-invert-bg);
+  color: var(--color-invert-fg);
 }
 
 .btn-primary:active {
@@ -297,6 +374,40 @@ button:disabled {
   color: var(--color-text-muted);
   cursor: not-allowed;
   border-color: transparent;
+}
+
+/* ----------------------------------------------------------- tema claro/oscuro -- */
+
+.theme-toggle {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (hover: hover) {
+  .theme-toggle:hover {
+    border-color: var(--color-accent-dark);
+  }
+}
+
+/* No debe pisar el título en pantallas anchas, donde el contenido se centra. */
+@media (min-width: 1200px) {
+  .theme-toggle {
+    top: var(--space-5);
+    right: calc((100vw - var(--content-max)) / 2 - 56px);
+  }
 }
 
 /* ---------------------------------------------------------- empty states -- */
@@ -406,7 +517,7 @@ button:disabled {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--color-bg);
+  background: var(--color-surface-soft);
   color: var(--color-text);
   font-size: 1rem;
   display: flex;
@@ -470,7 +581,7 @@ button:disabled {
 }
 
 .checkout-form input::placeholder {
-  color: #b3b8ac;
+  color: var(--color-placeholder);
   font-weight: 400;
 }
 
@@ -478,6 +589,27 @@ button:disabled {
   outline: none;
   border-color: var(--color-text);
   box-shadow: 0 0 0 3px rgba(186, 255, 41, 0.45);
+}
+
+/* El navegador pinta el autocompletado con un azul fijo que ignora el tema y
+   corta con todo lo demás. No se puede cambiar el fondo, pero sí taparlo con
+   una sombra interna del color de la superficie. */
+.checkout-form input:-webkit-autofill,
+.checkout-form input:-webkit-autofill:hover,
+.checkout-form input:-webkit-autofill:focus,
+.checkout-form input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
+  box-shadow: 0 0 0 1000px var(--color-surface) inset;
+  -webkit-text-fill-color: var(--color-text);
+  caret-color: var(--color-text);
+  transition: background-color 100000s ease-in-out 0s;
+}
+
+.checkout-form input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset,
+    0 0 0 3px rgba(186, 255, 41, 0.45);
+  box-shadow: 0 0 0 1000px var(--color-surface) inset,
+    0 0 0 3px rgba(186, 255, 41, 0.45);
 }
 
 .field--invalid input {
@@ -551,7 +683,7 @@ button:disabled {
 }
 
 .select__control:disabled {
-  background: var(--color-bg);
+  background: var(--color-surface-soft);
   color: var(--color-text-muted);
   cursor: not-allowed;
   border-color: var(--color-border);
@@ -595,11 +727,12 @@ button:disabled {
 
 .select__option.is-active,
 .select__option:hover {
-  background: var(--color-bg);
+  background: var(--color-surface-soft);
 }
 
 .select__option.is-selected {
   background: var(--color-accent);
+  color: #10120f;
   font-weight: 700;
 }
 
@@ -624,7 +757,9 @@ button:disabled {
   justify-content: center;
   padding: 0 5px;
   border-radius: 7px;
-  background: var(--color-surface);
+  /* Siempre clara: los logos de las marcas son oscuros y sobre un fondo
+     oscuro desaparecerían. */
+  background: #ffffff;
   border: 1.5px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   pointer-events: none;
@@ -641,13 +776,13 @@ button:disabled {
 .card-brand--visa,
 .card-brand--mastercard,
 .card-brand--amex {
-  border-color: var(--color-text);
+  border-color: var(--color-accent-dark);
   transform: translateY(-50%) scale(1.04);
 }
 
 .card-brand--empty {
-  color: var(--color-border-strong);
-  background: var(--color-bg);
+  color: #b7bcb1;
+  background: #f2f4ee;
 }
 
 .field--with-icon input {
@@ -702,7 +837,7 @@ button:disabled {
 
 /* Campo aún bloqueado: se ve apagado, no roto. */
 .checkout-form input:disabled {
-  background: var(--color-bg);
+  background: var(--color-surface-soft);
   color: var(--color-text-muted);
   cursor: not-allowed;
   border-color: var(--color-border);
@@ -733,7 +868,7 @@ button:disabled {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
-  background: var(--color-bg);
+  background: var(--color-surface-soft);
   border-radius: var(--radius-md);
 }
 
@@ -796,7 +931,7 @@ button:disabled {
   align-items: center;
   margin-top: var(--space-2);
   padding-top: var(--space-4);
-  border-top: 2px solid var(--color-text);
+  border-top: 2px solid var(--color-border-strong);
 }
 
 .summary-row--total .summary-row__label {
@@ -871,7 +1006,7 @@ button:disabled {
 
 .result-icon--success {
   background: var(--color-accent);
-  color: var(--color-text);
+  color: #10120f;
 }
 
 .result-icon--failure {
