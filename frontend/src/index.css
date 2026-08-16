@@ -543,10 +543,10 @@ button:disabled {
 
 .checkout-form legend {
   font-weight: 800;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  color: var(--color-text);
   margin-bottom: var(--space-2);
 }
 
@@ -558,8 +558,9 @@ button:disabled {
 }
 
 .field-label {
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .input-wrap {
@@ -574,7 +575,7 @@ button:disabled {
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 16px; /* 16px evita que iOS haga zoom al enfocar */
-  font-weight: 500;
+  font-weight: 600;
   background: var(--color-surface);
   color: var(--color-text);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -647,7 +648,7 @@ button:disabled {
   color: var(--color-text);
   font-family: inherit;
   font-size: 16px; /* 16px evita el zoom de iOS al enfocar */
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -825,13 +826,13 @@ button:disabled {
 
 .field-error {
   color: var(--color-danger);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
 .field-hint {
   color: var(--color-text-muted);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   margin-top: calc(var(--space-2) * -1);
 }
 
