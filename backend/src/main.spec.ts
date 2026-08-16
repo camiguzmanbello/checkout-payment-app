@@ -112,6 +112,9 @@ describe('bootstrap', () => {
       'api-docs',
       expect.anything(),
       expect.anything(),
+      expect.objectContaining({
+        customSiteTitle: expect.stringContaining('María Camila Guzmán Bello'),
+      }),
     );
   });
 });

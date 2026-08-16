@@ -84,7 +84,9 @@ the whole file is available through `process.env` without an extra config module
 With the server running, open: `http://localhost:3000/api-docs`
 
 There you can see every endpoint and try it straight from the browser ("Try it out"
-button on each one). Once the backend is deployed, the same path is public at
+button on each one). The page carries the whole flow written out, what each
+transaction status means, the note that card data never reaches a log or the
+database, the four endpoint groups as tags, and the author and licence. Once the backend is deployed, the same path is public at
 `https://your-domain/api-docs` — that is the link that goes in the root README as
 the "Swagger URL".
 
