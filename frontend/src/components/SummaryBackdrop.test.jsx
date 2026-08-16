@@ -101,13 +101,19 @@ describe('SummaryBackdrop', () => {
     expect(card.textContent).not.toContain('4242424242424242');
   });
 
-  it('completes the card with the holder and the expiry it was given', () => {
+  it('shows the holder but never the real expiry date', () => {
     const { container } = renderSummary();
     const card = container.querySelector('.payment-card');
 
     expect(card).toHaveTextContent('Maria Camila Guzman');
-    expect(card).toHaveTextContent('12/29');
-    // El CVC no se dibuja en ninguna parte: no está impreso al frente.
+    expect(card).toHaveTextContent('Válida hasta');
+
+    // Junto a un número conseguido por otro lado, la vigencia es la pieza que
+    // le sirve a un tercero que alcance a ver la pantalla.
+    expect(card.textContent).not.toContain('12/29');
+    expect(card.textContent).toContain('••/••');
+
+    // El CVC tampoco se dibuja: no está impreso al frente de una tarjeta.
     expect(card.textContent).not.toContain('123');
   });
 

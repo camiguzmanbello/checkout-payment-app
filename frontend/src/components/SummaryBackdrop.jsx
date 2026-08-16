@@ -111,12 +111,14 @@ export default function SummaryBackdrop() {
                         <small>Titular</small>
                         {cardData?.cardHolder}
                       </span>
-                      {cardData?.expMonth && cardData?.expYear && (
-                        <span className="payment-card__field payment-card__field--end">
-                          <small>Válida hasta</small>
-                          {cardData.expMonth}/{cardData.expYear}
-                        </span>
-                      )}
+                      {/* La vigencia va enmascarada: junto a un número obtenido
+                          por otro lado es la pieza que le sirve a un tercero, y
+                          esta pantalla se queda a la vista mientras se cobra. */}
+                      <span className="payment-card__field payment-card__field--end">
+                        <small>Válida hasta</small>
+                        <span aria-hidden="true">••/••</span>
+                        <span className="visually-hidden">oculta por seguridad</span>
+                      </span>
                     </span>
                   </span>
                   <span className="visually-hidden">
