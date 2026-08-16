@@ -20,6 +20,7 @@ import {
 } from '../utils/cardValidation';
 import { DEPARTMENT_NAMES, citiesOf } from '../utils/colombia';
 import CardBrandIcon from './CardBrandIcon';
+import SelectField from './SelectField';
 
 const EMPTY_FORM = {
   cardNumber: '',
@@ -152,7 +153,10 @@ export default function CheckoutModal() {
 
   if (!selectedProduct) return null;
 
-  const wrap = (name, label, control, extra = null) => {
+  // Los inputs van dentro de un <label>; los selects no. Un <label> reenvía
+  // cualquier clic de su interior al control que etiqueta, así que al elegir
+  // una opción de la lista el botón recibía un segundo clic y la reabría.
+  const wrap = (name, label, control, extra = null, { labelled = true } = {}) => {
     const fieldError = errorFor(name);
     const classes = [
       'field',
@@ -162,9 +166,13 @@ export default function CheckoutModal() {
       .filter(Boolean)
       .join(' ');
 
+    const Tag = labelled ? 'label' : 'div';
+
     return (
-      <label className={classes}>
-        <span className="field-label">{label}</span>
+      <Tag className={classes}>
+        <span className="field-label" id={labelled ? undefined : `${name}-label`}>
+          {label}
+        </span>
         <span className="input-wrap">
           {control}
           {extra}
@@ -174,7 +182,7 @@ export default function CheckoutModal() {
             {fieldError}
           </span>
         )}
-      </label>
+      </Tag>
     );
   };
 
@@ -197,28 +205,19 @@ export default function CheckoutModal() {
     wrap(
       name,
       label,
-      <span className="select-wrap">
-        <select
-          name={name}
-          className={form[name] ? '' : 'is-placeholder'}
-          value={form[name]}
-          onChange={update(name)}
-          onBlur={blur(name)}
-          aria-invalid={Boolean(errorFor(name))}
-          disabled={disabled}
-        >
-          <option value="">{placeholder}</option>
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </span>,
+      <SelectField
+        name={name}
+        labelId={`${name}-label`}
+        value={form[name]}
+        options={options}
+        placeholder={placeholder}
+        disabled={disabled}
+        invalid={Boolean(errorFor(name))}
+        onChange={(value) => setValue(name, value)}
+        onBlur={blur(name)}
+      />,
+      null,
+      { labelled: false },
     );
 
   const cvcDigits = cvcLengthFor(brand);

@@ -488,76 +488,126 @@ button:disabled {
   box-shadow: 0 0 0 3px rgba(209, 58, 52, 0.16);
 }
 
-/* Selects: el navegador dibuja su propia flecha y no se puede estilar, así que
-   se oculta y se pinta una con el mismo lenguaje visual de los inputs. */
-.select-wrap {
-  position: relative;
-  display: block;
-}
-
-.select-wrap::after {
-  content: '';
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  border-right: 2px solid var(--color-text-muted);
-  border-bottom: 2px solid var(--color-text-muted);
-  transform: translateY(-70%) rotate(45deg);
-  pointer-events: none;
-}
-
-/* Misma altura y tipografía que los inputs: al quitarle la apariencia nativa,
-   el select la calcula distinto en cada navegador y quedaba desalineado con el
-   CVC en la misma fila. */
-.checkout-form input,
-.checkout-form select {
+/* Lista propia en vez del desplegable nativo: el del sistema se dibuja fuera
+   del alcance del CSS y en escritorio salía enorme. A cambio, el teclado y
+   ARIA los sostiene SelectField. */
+.checkout-form input {
   height: var(--control-height);
   line-height: 1.2;
 }
 
-.checkout-form select {
+.select {
+  position: relative;
+  display: block;
+}
+
+.select__control {
   width: 100%;
   min-width: 0;
-  padding: 0 30px 0 12px;
+  height: var(--control-height);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 10px 0 12px;
   border: 1.5px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
   font-family: inherit;
   font-size: 16px; /* 16px evita el zoom de iOS al enfocar */
   font-weight: 500;
-  background: var(--color-surface);
-  color: var(--color-text);
-  appearance: none;
-  -webkit-appearance: none;
+  text-align: left;
   cursor: pointer;
-  /* Sin esto, un nombre largo como "Norte de Santander" se corta a la mitad. */
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* El texto del placeholder se ve como tal, no como un valor ya elegido. */
-.checkout-form select.is-placeholder {
+.select__control.is-placeholder {
   color: var(--color-text-muted);
   font-weight: 400;
 }
 
-.checkout-form select:focus {
+.select__value {
+  flex: 1;
+  min-width: 0;
+  /* Un nombre largo como "Norte de Santander" termina en puntos, no cortado. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select__arrow {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.select__control:focus-visible {
   outline: none;
   border-color: var(--color-text);
   box-shadow: 0 0 0 3px rgba(186, 255, 41, 0.45);
 }
 
-.checkout-form select:disabled {
+.select__control:disabled {
   background: var(--color-bg);
   color: var(--color-text-muted);
   cursor: not-allowed;
+  border-color: var(--color-border);
 }
 
-.field--invalid select {
+.select__control:disabled .select__arrow {
+  opacity: 0.5;
+}
+
+.field--invalid .select__control {
   border-color: var(--color-danger);
+}
+
+/* Filas compactas: el desplegable nativo las dibujaba mucho más altas. */
+.select__list {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 232px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.select__option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.select__option.is-active,
+.select__option:hover {
+  background: var(--color-bg);
+}
+
+.select__option.is-selected {
+  background: var(--color-accent);
+  font-weight: 700;
+}
+
+.select__option.is-disabled {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  cursor: not-allowed;
+  background: transparent;
 }
 
 /* Ficha de la marca: dentro del campo, con fondo y borde propios para que se
