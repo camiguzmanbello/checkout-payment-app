@@ -1,5 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { confirmPayment, backToProduct } from '../features/checkout/checkoutSlice';
+import { detectCardBrand } from '../utils/cardValidation';
+import CardBrandIcon from './CardBrandIcon';
 
 function formatCOP(cents) {
   return new Intl.NumberFormat('es-CO', {
@@ -37,6 +39,7 @@ export default function SummaryBackdrop() {
   if (!transaction) return null;
 
   const lastFour = cardData?.number?.replace(/\s+/g, '').slice(-4);
+  const brand = detectCardBrand(cardData?.number ?? '');
 
   return (
     <div
@@ -94,7 +97,20 @@ export default function SummaryBackdrop() {
             {lastFour && (
               <div>
                 <dt>Pagas con</dt>
-                <dd>Tarjeta terminada en {lastFour}</dd>
+                <dd>
+                  {/* Antes era una línea de texto y la marca no se veía por
+                      ningún lado. Ahora se dibuja la tarjeta. */}
+                  <span className={`payment-card${loading ? ' payment-card--busy' : ''}`}>
+                    <span className="payment-card__chip" aria-hidden="true" />
+                    <CardBrandIcon brand={brand} />
+                    <span className="payment-card__number">
+                      <span aria-hidden="true">•••• •••• ••••</span> {lastFour}
+                    </span>
+                  </span>
+                  <span className="visually-hidden">
+                    Tarjeta terminada en {lastFour}
+                  </span>
+                </dd>
               </div>
             )}
             {deliveryData?.address && (

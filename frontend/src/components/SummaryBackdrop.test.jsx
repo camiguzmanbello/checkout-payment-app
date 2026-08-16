@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import checkoutReducer from '../features/checkout/checkoutSlice';
@@ -83,11 +83,27 @@ describe('SummaryBackdrop', () => {
     expect(screen.getByText('$ 263.000')).toBeInTheDocument();
   });
 
-  it('states which card gets charged, showing only the last four digits', () => {
-    renderSummary();
+  it('draws the card being charged, with its brand and only the last four', () => {
+    const { container } = renderSummary();
 
-    expect(screen.getByText(/Tarjeta terminada en 4242$/)).toBeInTheDocument();
+    const card = container.querySelector('.payment-card');
+    expect(card).not.toBeNull();
+    expect(card).toHaveTextContent('4242');
+    // La marca se ve, que era lo que se perdía cuando esto era una línea suelta.
+    expect(within(card).getByRole('img', { name: /visa/i })).toBeInTheDocument();
+    // El número completo nunca aparece.
     expect(screen.queryByText(/4242 4242 4242 4242/)).not.toBeInTheDocument();
+    expect(card.textContent).not.toContain('4242424242424242');
+  });
+
+  it('keeps the card readable for a screen reader', () => {
+    renderSummary();
+    expect(screen.getByText('Tarjeta terminada en 4242')).toBeInTheDocument();
+  });
+
+  it('pulses the card while the charge is being processed', () => {
+    const { container } = renderSummary({ loading: true });
+    expect(container.querySelector('.payment-card--busy')).not.toBeNull();
   });
 
   it('states where the order ships to', () => {
