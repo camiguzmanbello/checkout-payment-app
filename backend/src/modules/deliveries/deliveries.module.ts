@@ -9,16 +9,23 @@ export class CreateDeliveryDto {
   @MaxLength(200)
   address: string;
 
+  // Los nombres reales de municipios traen puntos, guiones y apóstrofes
+  // ("Bogotá D.C.", "Villa d'Leyva"), así que la regla es "sin dígitos" y no
+  // "solo letras". Los dígitos siguen fuera: son la señal de basura pegada.
   @IsString()
   @MinLength(2)
   @MaxLength(80)
-  @Matches(/^[a-zA-ZÀ-ÿ\s]+$/, { message: 'city solo admite letras y espacios' })
+  @Matches(/^[a-zA-ZÀ-ÿ\s.'-]+$/, {
+    message: 'city no admite dígitos ni símbolos',
+  })
   city: string;
 
   @IsString()
   @MinLength(2)
   @MaxLength(80)
-  @Matches(/^[a-zA-ZÀ-ÿ\s]+$/, { message: 'region solo admite letras y espacios' })
+  @Matches(/^[a-zA-ZÀ-ÿ\s.'-]+$/, {
+    message: 'region no admite dígitos ni símbolos',
+  })
   region: string;
 
   @IsString()

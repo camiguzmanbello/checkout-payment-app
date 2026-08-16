@@ -78,6 +78,13 @@ describe('CreateDeliveryDto', () => {
     await expect(errorsFor(delivery)).resolves.toEqual([]);
   });
 
+  it.each(['Bogotá D.C.', 'San Andrés', "Villa d'Leyva", 'Santa Rosa de Cabal'])(
+    'accepts %s, a real municipality name',
+    async (city) => {
+      await expect(errorsFor({ ...delivery, city })).resolves.toEqual([]);
+    },
+  );
+
   it.each([
     ['an address that is too short', { address: 'abc' }],
     ['a city with digits', { city: 'Bogota 2' }],
