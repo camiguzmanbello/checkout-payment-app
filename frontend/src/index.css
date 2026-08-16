@@ -359,6 +359,88 @@ img {
   background: var(--color-surface-soft);
 }
 
+/* --------------------------------------------------------------- pie -- */
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-6);
+  display: grid;
+  gap: var(--space-5);
+}
+
+/* Igual que el hero: en ancho, la firma se va a la derecha en vez de dejar
+   media pantalla en blanco. */
+@media (min-width: 760px) {
+  .site-footer {
+    grid-template-columns: 1.35fr 1fr;
+    gap: var(--space-7);
+    align-items: start;
+  }
+}
+
+.site-footer__intro h2 {
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  max-width: 24ch;
+}
+
+.site-footer__lead {
+  color: var(--color-text-muted);
+  margin-top: var(--space-3);
+  font-size: 0.92rem;
+  max-width: 46ch;
+}
+
+.site-footer__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+@media (min-width: 760px) {
+  .site-footer__side {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+.site-footer__author {
+  font-size: 0.92rem;
+}
+
+.site-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  padding: 8px 14px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .site-footer__link:hover {
+    border-color: var(--color-text);
+    background: var(--color-surface);
+  }
+}
+
+.site-footer__link:focus-visible {
+  outline: 3px solid var(--color-accent-dark);
+  outline-offset: 2px;
+}
+
+.site-footer__meta {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
 /* ------------------------------------------------------------------ grid -- */
 
 /* auto-fill mantiene el ancho de tarjeta constante: en vez de estirar dos
