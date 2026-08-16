@@ -1,3 +1,5 @@
+import { isValidCity, isValidDepartment } from './colombia';
+
 // Algoritmo de Luhn para validar el número de tarjeta
 export function isValidCardNumber(rawNumber) {
   const digits = rawNumber.replace(/\s+/g, '');
@@ -71,6 +73,38 @@ export function isValidExpiry(month, year) {
   return true;
 }
 
+// Opciones para los selects de expiración: mes y año se eligen, no se
+// escriben, así que nunca puede quedar un "20" en el campo del mes.
+export const EXPIRY_MONTHS = [
+  { value: '01', label: '01 · Ene' },
+  { value: '02', label: '02 · Feb' },
+  { value: '03', label: '03 · Mar' },
+  { value: '04', label: '04 · Abr' },
+  { value: '05', label: '05 · May' },
+  { value: '06', label: '06 · Jun' },
+  { value: '07', label: '07 · Jul' },
+  { value: '08', label: '08 · Ago' },
+  { value: '09', label: '09 · Sep' },
+  { value: '10', label: '10 · Oct' },
+  { value: '11', label: '11 · Nov' },
+  { value: '12', label: '12 · Dic' },
+];
+
+export function expiryYears(span = 15, today = new Date()) {
+  const start = today.getFullYear() % 100;
+  return Array.from({ length: span + 1 }, (_, i) =>
+    String(start + i).padStart(2, '0'),
+  );
+}
+
+// Dentro del año en curso, los meses ya pasados se deshabilitan en el select.
+export function isMonthUnavailable(month, year, today = new Date()) {
+  if (!year) return false;
+  const currentYear = today.getFullYear() % 100;
+  if (parseInt(year, 10) !== currentYear) return false;
+  return parseInt(month, 10) < today.getMonth() + 1;
+}
+
 export function formatCardNumber(value) {
   return value
     .replace(/\D/g, '')
@@ -110,7 +144,7 @@ export function validateField(field, value, form = {}) {
 
     case 'expMonth':
     case 'expYear': {
-      if (!form.expMonth || !form.expYear) return 'Completa mes y año';
+      if (!form.expMonth || !form.expYear) return 'Elige mes y año de expiración';
       const month = parseInt(form.expMonth, 10);
       if (!month || month < 1 || month > 12) return 'El mes debe estar entre 01 y 12';
       if (!isValidExpiry(form.expMonth, form.expYear)) return 'La tarjeta está vencida';
@@ -148,14 +182,19 @@ export function validateField(field, value, form = {}) {
       if (text.length < 5) return 'Dirección demasiado corta';
       return null;
 
-    case 'city':
-      if (!text) return 'Ingresa tu ciudad';
-      if (text.length < 2) return 'Ciudad demasiado corta';
+    // Ciudad y departamento salen de una lista cerrada: se valida que existan
+    // y que la ciudad pertenezca al departamento elegido.
+    case 'region':
+      if (!text) return 'Elige tu departamento';
+      if (!isValidDepartment(text)) return 'Departamento no válido';
       return null;
 
-    case 'region':
-      if (!text) return 'Ingresa tu departamento';
-      if (text.length < 2) return 'Departamento demasiado corto';
+    case 'city':
+      if (!form.region) return 'Elige primero el departamento';
+      if (!text) return 'Elige tu ciudad';
+      if (!isValidCity(form.region, text)) {
+        return `Esa ciudad no pertenece a ${form.region}`;
+      }
       return null;
 
     default:
