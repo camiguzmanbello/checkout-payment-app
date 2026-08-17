@@ -6,6 +6,7 @@ import {
   setCustomerData,
   submitCheckoutInfo,
   backToProduct,
+  acknowledgeCardReentry,
 } from '../features/checkout/checkoutSlice';
 import {
   detectCardBrand,
@@ -21,6 +22,7 @@ import {
 } from '../utils/cardValidation';
 import { DEPARTMENT_NAMES, citiesOf } from '../utils/colombia';
 import CardBrandIcon from './CardBrandIcon';
+import CardReentryDialog from './CardReentryDialog';
 import SelectField from './SelectField';
 
 const EMPTY_FORM = {
@@ -65,7 +67,9 @@ export default function CheckoutModal() {
   // al hacer scroll, así que nunca debe ser la única salida.
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.key === 'Escape' && !loading) close();
+      // Con el diálogo abierto, Escape le toca a él: cerrar el formulario
+      // entero desde atrás dejaría el aviso sin leer.
+      if (e.key === 'Escape' && !loading && !cardReentryNeeded) close();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -225,146 +229,140 @@ export default function CheckoutModal() {
   const cities = citiesOf(form.region);
 
   return (
-    <div
-      className="modal-overlay"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget && !loading) close();
-      }}
-    >
-      <div className="modal" role="dialog" aria-modal="true" aria-label="Pagar con tarjeta">
-        <header className="modal-header">
-          <div>
-            <h2>Pagar con tarjeta</h2>
-            <p className="modal-subtitle">{selectedProduct.name}</p>
-          </div>
-          <button type="button" className="close-btn" onClick={close} aria-label="Cerrar">
-            ✕
-          </button>
-        </header>
+    <>
+      <div
+        className="modal-overlay"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget && !loading) close();
+        }}
+      >
+        <div className="modal" role="dialog" aria-modal="true" aria-label="Pagar con tarjeta">
+          <header className="modal-header">
+            <div>
+              <h2>Pagar con tarjeta</h2>
+              <p className="modal-subtitle">{selectedProduct.name}</p>
+            </div>
+            <button type="button" className="close-btn" onClick={close} aria-label="Cerrar">
+              ✕
+            </button>
+          </header>
 
-        {/* Nada salió mal acá, así que el aviso no se pinta como una alerta:
-            una superficie neutra y jerarquía por tipografía, no por color. */}
-        {cardReentryNeeded && (
-          <div className="form-notice" role="status">
-            <strong className="form-notice__title">Vuelve a ingresar tu tarjeta</strong>
-            <p className="form-notice__detail">
-              Por seguridad no guardamos los datos de tu tarjeta, así que se
-              borraron al recargar la página. No se realizó ningún cobro.
-            </p>
-          </div>
-        )}
+          <form onSubmit={handleSubmit} className="checkout-form" noValidate>
+            <fieldset>
+              <legend>Tarjeta de crédito</legend>
 
-        <form onSubmit={handleSubmit} className="checkout-form" noValidate>
-          <fieldset>
-            <legend>Tarjeta de crédito</legend>
+              {input(
+                'cardNumber',
+                'Número de tarjeta',
+                {
+                  inputMode: 'numeric',
+                  autoComplete: 'cc-number',
+                  // Se ajusta a la marca: 16 dígitos + 3 espacios, o los 15 de
+                  // Amex + 2. Antes daba cabida a 19 y sobraba campo.
+                  maxLength: cardInputLengthFor(brand),
+                  placeholder: '4242 4242 4242 4242',
+                },
+                <CardBrandIcon brand={brand} />,
+              )}
 
-            {input(
-              'cardNumber',
-              'Número de tarjeta',
-              {
-                inputMode: 'numeric',
-                autoComplete: 'cc-number',
-                // Se ajusta a la marca: 16 dígitos + 3 espacios, o los 15 de
-                // Amex + 2. Antes daba cabida a 19 y sobraba campo.
-                maxLength: cardInputLengthFor(brand),
-                placeholder: '4242 4242 4242 4242',
-              },
-              <CardBrandIcon brand={brand} />,
-            )}
+              {!cardReady && (
+                <p className="field-hint">
+                  Escribe el número completo para habilitar el resto de los datos.
+                </p>
+              )}
 
-            {!cardReady && (
-              <p className="field-hint">
-                Escribe el número completo para habilitar el resto de los datos.
+              {input('cardHolder', 'Nombre en la tarjeta', {
+                autoComplete: 'cc-name',
+                placeholder: 'Como aparece en la tarjeta',
+                disabled: !cardReady,
+              })}
+
+              <div className="inline-fields">
+                {select(
+                  'expMonth',
+                  'Mes',
+                  EXPIRY_MONTHS.map((month) => ({
+                    ...month,
+                    disabled: isMonthUnavailable(month.value, form.expYear),
+                  })),
+                  { placeholder: 'MM', disabled: !cardReady },
+                )}
+                {select(
+                  'expYear',
+                  'Año',
+                  YEARS.map((year) => ({ value: year, label: `20${year}` })),
+                  { placeholder: 'AA', disabled: !cardReady },
+                )}
+                {input('cvc', `CVC${cardReady && cvcDigits ? ` (${cvcDigits} dígitos)` : ''}`, {
+                  inputMode: 'numeric',
+                  autoComplete: 'cc-csc',
+                  maxLength: cvcDigits ?? 4,
+                  placeholder: cvcDigits === 4 ? '1234' : '123',
+                  disabled: !cardReady,
+                })}
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Datos de entrega</legend>
+
+              {input('fullName', 'Nombre completo', { autoComplete: 'name' })}
+              {input('email', 'Email', {
+                type: 'email',
+                autoComplete: 'email',
+                placeholder: 'tucorreo@dominio.com',
+              })}
+              {input('phone', 'Teléfono', {
+                inputMode: 'tel',
+                autoComplete: 'tel',
+                placeholder: '+57 300 000 0000',
+              })}
+              {input('address', 'Dirección', {
+                autoComplete: 'street-address',
+                placeholder: 'Calle 100 #15-20 Apto 401',
+              })}
+
+              <div className="inline-fields inline-fields--halves">
+                {select(
+                  'region',
+                  'Departamento',
+                  DEPARTMENT_NAMES.map((name) => ({ value: name, label: name })),
+                  { placeholder: 'Elige tu departamento' },
+                )}
+                {select(
+                  'city',
+                  'Ciudad',
+                  cities.map((name) => ({ value: name, label: name })),
+                  {
+                    placeholder: form.region ? 'Elige tu ciudad' : 'Elige antes el departamento',
+                    disabled: !form.region,
+                  },
+                )}
+              </div>
+            </fieldset>
+
+            {error && (
+              <p className="form-error" role="alert">
+                {error}
               </p>
             )}
 
-            {input('cardHolder', 'Nombre en la tarjeta', {
-              autoComplete: 'cc-name',
-              placeholder: 'Como aparece en la tarjeta',
-              disabled: !cardReady,
-            })}
+            {submitted && !formValid && (
+              <p className="form-error" role="alert">
+                Revisa los campos marcados en rojo.
+              </p>
+            )}
 
-            <div className="inline-fields">
-              {select(
-                'expMonth',
-                'Mes',
-                EXPIRY_MONTHS.map((month) => ({
-                  ...month,
-                  disabled: isMonthUnavailable(month.value, form.expYear),
-                })),
-                { placeholder: 'MM', disabled: !cardReady },
-              )}
-              {select(
-                'expYear',
-                'Año',
-                YEARS.map((year) => ({ value: year, label: `20${year}` })),
-                { placeholder: 'AA', disabled: !cardReady },
-              )}
-              {input('cvc', `CVC${cardReady && cvcDigits ? ` (${cvcDigits} dígitos)` : ''}`, {
-                inputMode: 'numeric',
-                autoComplete: 'cc-csc',
-                maxLength: cvcDigits ?? 4,
-                placeholder: cvcDigits === 4 ? '1234' : '123',
-                disabled: !cardReady,
-              })}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend>Datos de entrega</legend>
-
-            {input('fullName', 'Nombre completo', { autoComplete: 'name' })}
-            {input('email', 'Email', {
-              type: 'email',
-              autoComplete: 'email',
-              placeholder: 'tucorreo@dominio.com',
-            })}
-            {input('phone', 'Teléfono', {
-              inputMode: 'tel',
-              autoComplete: 'tel',
-              placeholder: '+57 300 000 0000',
-            })}
-            {input('address', 'Dirección', {
-              autoComplete: 'street-address',
-              placeholder: 'Calle 100 #15-20 Apto 401',
-            })}
-
-            <div className="inline-fields inline-fields--halves">
-              {select(
-                'region',
-                'Departamento',
-                DEPARTMENT_NAMES.map((name) => ({ value: name, label: name })),
-                { placeholder: 'Elige tu departamento' },
-              )}
-              {select(
-                'city',
-                'Ciudad',
-                cities.map((name) => ({ value: name, label: name })),
-                {
-                  placeholder: form.region ? 'Elige tu ciudad' : 'Elige antes el departamento',
-                  disabled: !form.region,
-                },
-              )}
-            </div>
-          </fieldset>
-
-          {error && (
-            <p className="form-error" role="alert">
-              {error}
-            </p>
-          )}
-
-          {submitted && !formValid && (
-            <p className="form-error" role="alert">
-              Revisa los campos marcados en rojo.
-            </p>
-          )}
-
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Procesando...' : 'Continuar'}
-          </button>
-        </form>
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Procesando...' : 'Continuar'}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+
+      {cardReentryNeeded && (
+        <CardReentryDialog onAccept={() => dispatch(acknowledgeCardReentry())} />
+      )}
+    </>
   );
 }

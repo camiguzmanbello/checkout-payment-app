@@ -84,6 +84,9 @@ const checkoutSlice = createSlice({
     goToSummary(state) {
       state.step = 'summary';
     },
+    acknowledgeCardReentry(state) {
+      state.cardReentryNeeded = false;
+    },
     backToProduct(state) {
       return { ...initialState, products: state.products };
     },
@@ -144,6 +147,7 @@ export const {
   setDeliveryData,
   setCustomerData,
   goToSummary,
+  acknowledgeCardReentry,
   backToProduct,
   resetError,
 } = checkoutSlice.actions;

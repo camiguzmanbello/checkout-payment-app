@@ -38,6 +38,7 @@ src/
     SummaryBackdrop.jsx   -> screen 3, the summary
     FinalStatus.jsx       -> screens 4 and 5, the outcome
     SelectField.jsx       -> listbox used instead of a native select
+    CardReentryDialog.jsx -> asks the buyer to acknowledge a card lost to a reload
     CardBrandIcon.jsx     -> inline SVG logos for Visa, MasterCard and Amex,
                              reused on the card drawn in the summary
     ThemeToggle.jsx       -> light/dark switch
@@ -248,8 +249,9 @@ only step that needs the card to move forward, so resuming it left a `Pagar`
 button that blew up on `cardData.number`; the thunk rejection then landed on the
 result screen as *"no pudimos confirmar tu pago"*, over a transaction the
 provider had never even been asked about. Rehydrating a summary now returns to
-the form with `cardReentryNeeded` set, which is what draws the notice saying the
-card was dropped and that nothing was charged. The stale `PENDING` transaction is
+the form with `cardReentryNeeded` set, which raises `CardReentryDialog`: the
+buyer has to acknowledge that the card was dropped and that nothing was charged
+before reaching the form. The stale `PENDING` transaction is
 released — submitting again creates a fresh one, and `PENDING` never moved stock.
 `confirmPayment` also carries a `condition` guard so no other path can turn a
 missing card into what looks like a failed charge.

@@ -291,7 +291,7 @@ describe('CheckoutModal', () => {
   // Quien recarga en el resumen aterriza acá de vuelta. Sin explicación parece
   // que la app perdió sus datos sola, o peor, que le cobraron y algo falló.
   describe('after a reload wiped the card on the summary step', () => {
-    const renderWithNotice = () => {
+    const renderWithDialog = () => {
       const store = configureStore({
         reducer: { checkout: checkoutReducer },
         preloadedState: {
@@ -303,30 +303,51 @@ describe('CheckoutModal', () => {
           },
         },
       });
-      return render(
+      const utils = render(
         <Provider store={store}>
           <CheckoutModal />
         </Provider>,
       );
+      return { store, ...utils };
     };
 
     it('explains why the card fields are empty again', () => {
-      renderWithNotice();
+      renderWithDialog();
 
-      expect(screen.getByRole('status')).toHaveTextContent(/vuelve a ingresar tu tarjeta/i);
-      expect(screen.getByRole('status')).toHaveTextContent(/se borraron al recargar la página/i);
+      const dialog = screen.getByRole('alertdialog');
+      expect(dialog).toHaveTextContent(/vuelve a ingresar tu tarjeta/i);
+      expect(dialog).toHaveTextContent(/se borraron al recargar la página/i);
     });
 
     it('says outright that nothing was charged', () => {
-      renderWithNotice();
+      renderWithDialog();
 
-      expect(screen.getByRole('status')).toHaveTextContent(/no se realizó ningún cobro/i);
+      expect(screen.getByRole('alertdialog')).toHaveTextContent(/no se realizó ningún cobro/i);
+    });
+
+    it('closes once the buyer acknowledges it', () => {
+      const { store } = renderWithDialog();
+
+      fireEvent.click(screen.getByRole('button', { name: /aceptar/i }));
+
+      expect(store.getState().checkout.cardReentryNeeded).toBe(false);
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    // Escape es del diálogo mientras esté abierto: cerrar el formulario desde
+    // atrás dejaría el aviso sin leer y de vuelta en el catálogo.
+    it('does not let Escape close the form behind it', () => {
+      const { store } = renderWithDialog();
+
+      fireEvent.keyDown(window, { key: 'Escape' });
+
+      expect(store.getState().checkout.step).toBe('checkout');
     });
 
     it('stays quiet when the card was never lost', () => {
       renderModal();
 
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
   });
 });
