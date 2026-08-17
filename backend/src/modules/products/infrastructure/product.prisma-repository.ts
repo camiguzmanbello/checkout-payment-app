@@ -25,11 +25,23 @@ export class ProductPrismaRepository implements ProductRepositoryPort {
     return new Product(r.id, r.name, r.description, r.price, r.stock, r.imageUrl);
   }
 
-  async decreaseStock(id: string, quantity: number): Promise<Product> {
-    const r = await this.prisma.product.update({
-      where: { id },
+  // `updateMany` es lo que permite poner la condición en el WHERE: el motor
+  // evalúa `stock >= quantity` y descuenta en la misma sentencia, bajo el mismo
+  // lock de fila. `update` no acepta filtrar por otra columna, y hacerlo en dos
+  // pasos reabre la carrera que esto viene a cerrar. Si no alcanzaba, no hay
+  // fila afectada y el stock queda intacto.
+  async reserveStock(id: string, quantity: number): Promise<boolean> {
+    const { count } = await this.prisma.product.updateMany({
+      where: { id, stock: { gte: quantity } },
       data: { stock: { decrement: quantity } },
     });
-    return new Product(r.id, r.name, r.description, r.price, r.stock, r.imageUrl);
+    return count > 0;
+  }
+
+  async releaseStock(id: string, quantity: number): Promise<void> {
+    await this.prisma.product.update({
+      where: { id },
+      data: { stock: { increment: quantity } },
+    });
   }
 }

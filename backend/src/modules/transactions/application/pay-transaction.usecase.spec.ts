@@ -11,7 +11,8 @@ describe('PayTransactionUseCase', () => {
   const mockProductRepo = {
     findById: jest.fn(),
     findAll: jest.fn(),
-    decreaseStock: jest.fn(),
+    reserveStock: jest.fn(),
+    releaseStock: jest.fn(),
   };
   const mockGateway = {
     tokenizeCard: jest.fn(),
@@ -61,7 +62,11 @@ describe('PayTransactionUseCase', () => {
     status,
   });
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // There is stock unless a test says otherwise.
+    mockProductRepo.reserveStock.mockResolvedValue(true);
+  });
 
   it('fails when the transaction does not exist', async () => {
     mockTransactionRepo.findById.mockResolvedValue(null);
@@ -70,8 +75,59 @@ describe('PayTransactionUseCase', () => {
 
     expect(result.isFailure).toBe(true);
     if (result.isFailure) expect(result.error).toBe('TRANSACTION_NOT_FOUND');
+    expect(mockProductRepo.reserveStock).not.toHaveBeenCalled();
     expect(mockGateway.tokenizeCard).not.toHaveBeenCalled();
     expect(mockTransactionRepo.updateResult).not.toHaveBeenCalled();
+  });
+
+  // Reserving up front is what turns a sold-out product into a rejection
+  // instead of a charge for something that is no longer there.
+  describe('when the stock ran out before paying', () => {
+    beforeEach(() => {
+      mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
+      mockProductRepo.reserveStock.mockResolvedValue(false);
+    });
+
+    it('rejects with INSUFFICIENT_STOCK', async () => {
+      const result = await useCase.execute(input);
+
+      expect(result.isFailure).toBe(true);
+      if (result.isFailure) expect(result.error).toBe('INSUFFICIENT_STOCK');
+    });
+
+    it('never reaches the gateway, so the buyer is not charged', async () => {
+      await useCase.execute(input);
+
+      expect(mockGateway.tokenizeCard).not.toHaveBeenCalled();
+      expect(mockGateway.createTransaction).not.toHaveBeenCalled();
+      expect(mockTransactionRepo.updateResult).not.toHaveBeenCalled();
+    });
+
+    // Nothing was taken, so there is nothing to give back. Releasing here would
+    // invent stock that never existed.
+    it('does not release anything, since nothing was reserved', async () => {
+      await useCase.execute(input);
+
+      expect(mockProductRepo.releaseStock).not.toHaveBeenCalled();
+    });
+  });
+
+  it('reserves the stock before touching the gateway', async () => {
+    mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
+    mockGateway.tokenizeCard.mockResolvedValue('tok_123');
+    mockGateway.createTransaction.mockResolvedValue({
+      gatewayTransactionId: 'gw-1',
+      status: 'APPROVED',
+      raw: {},
+    });
+    mockTransactionRepo.updateResult.mockResolvedValue(updatedWith('APPROVED'));
+
+    await useCase.execute(input);
+
+    expect(mockProductRepo.reserveStock).toHaveBeenCalledWith('p1', 2);
+    expect(mockProductRepo.reserveStock.mock.invocationCallOrder[0]).toBeLessThan(
+      mockGateway.tokenizeCard.mock.invocationCallOrder[0],
+    );
   });
 
   it('tokenizes the card and charges the stored total', async () => {
@@ -95,7 +151,7 @@ describe('PayTransactionUseCase', () => {
     });
   });
 
-  it('marks the transaction APPROVED and decreases stock', async () => {
+  it('marks the transaction APPROVED and keeps the reserved stock', async () => {
     mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
     mockGateway.tokenizeCard.mockResolvedValue('tok_123');
     mockGateway.createTransaction.mockResolvedValue({
@@ -115,10 +171,10 @@ describe('PayTransactionUseCase', () => {
       'gw-1',
       'APPROVED',
     );
-    expect(mockProductRepo.decreaseStock).toHaveBeenCalledWith('p1', 2);
+    expect(mockProductRepo.releaseStock).not.toHaveBeenCalled();
   });
 
-  it('marks the transaction DECLINED and leaves stock untouched', async () => {
+  it('marks the transaction DECLINED and gives the stock back', async () => {
     mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
     mockGateway.tokenizeCard.mockResolvedValue('tok_123');
     mockGateway.createTransaction.mockResolvedValue({
@@ -138,10 +194,10 @@ describe('PayTransactionUseCase', () => {
       'gw-2',
       'DECLINED',
     );
-    expect(mockProductRepo.decreaseStock).not.toHaveBeenCalled();
+    expect(mockProductRepo.releaseStock).toHaveBeenCalledWith('p1', 2);
   });
 
-  it('stores the ERROR reported by the gateway without decreasing stock', async () => {
+  it('stores the ERROR reported by the gateway and gives the stock back', async () => {
     mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
     mockGateway.tokenizeCard.mockResolvedValue('tok_123');
     mockGateway.createTransaction.mockResolvedValue({
@@ -160,10 +216,10 @@ describe('PayTransactionUseCase', () => {
       '',
       'ERROR',
     );
-    expect(mockProductRepo.decreaseStock).not.toHaveBeenCalled();
+    expect(mockProductRepo.releaseStock).toHaveBeenCalledWith('p1', 2);
   });
 
-  it('turns a tokenization failure into ERROR instead of throwing', async () => {
+  it('turns a tokenization failure into ERROR and gives the stock back', async () => {
     mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
     mockGateway.tokenizeCard.mockRejectedValue(new Error('tokenize failed'));
     mockTransactionRepo.updateResult.mockResolvedValue(updatedWith('ERROR'));
@@ -179,10 +235,10 @@ describe('PayTransactionUseCase', () => {
       '',
       'ERROR',
     );
-    expect(mockProductRepo.decreaseStock).not.toHaveBeenCalled();
+    expect(mockProductRepo.releaseStock).toHaveBeenCalledWith('p1', 2);
   });
 
-  it('turns a network failure while charging into ERROR', async () => {
+  it('turns a network failure while charging into ERROR and gives the stock back', async () => {
     mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
     mockGateway.tokenizeCard.mockResolvedValue('tok_123');
     mockGateway.createTransaction.mockRejectedValue(new Error('ECONNRESET'));
@@ -197,6 +253,39 @@ describe('PayTransactionUseCase', () => {
       '',
       'ERROR',
     );
-    expect(mockProductRepo.decreaseStock).not.toHaveBeenCalled();
+    expect(mockProductRepo.releaseStock).toHaveBeenCalledWith('p1', 2);
+  });
+
+  // The gateway is not the only thing that can fail after the reservation. If
+  // the write to the database blows up, the units stay held by a transaction
+  // that will never be charged, and nobody is left to hand them back.
+  it('gives the stock back when the update after charging throws', async () => {
+    mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
+    mockGateway.tokenizeCard.mockResolvedValue('tok_123');
+    mockGateway.createTransaction.mockResolvedValue({
+      gatewayTransactionId: 'gw-1',
+      status: 'APPROVED',
+      raw: {},
+    });
+    mockTransactionRepo.updateResult.mockRejectedValue(new Error('db is down'));
+
+    await expect(useCase.execute(input)).rejects.toThrow('db is down');
+
+    expect(mockProductRepo.releaseStock).toHaveBeenCalledWith('p1', 2);
+  });
+
+  it('releases the stock exactly once', async () => {
+    mockTransactionRepo.findById.mockResolvedValue(pendingTransaction);
+    mockGateway.tokenizeCard.mockResolvedValue('tok_123');
+    mockGateway.createTransaction.mockResolvedValue({
+      gatewayTransactionId: 'gw-2',
+      status: 'DECLINED',
+      raw: {},
+    });
+    mockTransactionRepo.updateResult.mockResolvedValue(updatedWith('DECLINED'));
+
+    await useCase.execute(input);
+
+    expect(mockProductRepo.releaseStock).toHaveBeenCalledTimes(1);
   });
 });

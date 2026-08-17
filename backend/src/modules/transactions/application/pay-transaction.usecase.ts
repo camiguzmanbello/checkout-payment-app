@@ -22,7 +22,7 @@ export interface PayTransactionInput {
   customerEmail: string;
 }
 
-export type PayTransactionError = 'TRANSACTION_NOT_FOUND';
+export type PayTransactionError = 'TRANSACTION_NOT_FOUND' | 'INSUFFICIENT_STOCK';
 
 @Injectable()
 export class PayTransactionUseCase {
@@ -35,14 +35,20 @@ export class PayTransactionUseCase {
     private readonly paymentGateway: PaymentGatewayPort,
   ) {}
 
+  // El stock se reserva antes de tocar la pasarela. Descontarlo al final, sólo
+  // si el cobro salía aprobado, dejaba cobrar una unidad que otra compra ya se
+  // había llevado mientras tanto: se le sacaba la plata a alguien por algo que
+  // no había. Reservar primero convierte eso en un rechazo sin cobro.
   async execute(
     input: PayTransactionInput,
   ): Promise<Result<TransactionRecord, PayTransactionError>> {
     const transactionResult = await this.findTransaction(input.transactionId);
 
-    return transactionResult.andThen((transaction) =>
-      this.chargeAndUpdate(transaction, input),
-    );
+    return transactionResult
+      .andThen((transaction) => this.reserveStock(transaction))
+      .then((reserved) =>
+        reserved.andThen((transaction) => this.chargeReserved(transaction, input)),
+      );
   }
 
   private async findTransaction(
@@ -52,24 +58,48 @@ export class PayTransactionUseCase {
     return transaction ? ok(transaction) : fail('TRANSACTION_NOT_FOUND');
   }
 
-  private async chargeAndUpdate(
+  private async reserveStock(
+    transaction: TransactionRecord,
+  ): Promise<Result<TransactionRecord, PayTransactionError>> {
+    const reserved = await this.productRepository.reserveStock(
+      transaction.productId,
+      transaction.quantity,
+    );
+    return reserved ? ok(transaction) : fail('INSUFFICIENT_STOCK');
+  }
+
+  private async chargeReserved(
     transaction: TransactionRecord,
     input: PayTransactionInput,
   ): Promise<Result<TransactionRecord, PayTransactionError>> {
-    const chargeResult = await this.charge(transaction, input.card, input.customerEmail);
+    // Desde acá el stock ya está retenido, así que cualquier salida que no sea
+    // un cobro aprobado tiene que devolverlo — incluida una excepción que se
+    // escape de la actualización en base. El `finally` es lo que garantiza que
+    // no quede una unidad retenida por una transacción que nunca se cobró, y
+    // que la devolución ocurra una sola vez.
+    let charged = false;
 
-    const updated = await this.transactionRepository.updateResult(
-      transaction.id,
-      chargeResult.status,
-      chargeResult.gatewayTransactionId,
-      chargeResult.status,
-    );
+    try {
+      const chargeResult = await this.charge(transaction, input.card, input.customerEmail);
 
-    if (chargeResult.status === 'APPROVED') {
-      await this.productRepository.decreaseStock(transaction.productId, transaction.quantity);
+      const updated = await this.transactionRepository.updateResult(
+        transaction.id,
+        chargeResult.status,
+        chargeResult.gatewayTransactionId,
+        chargeResult.status,
+      );
+
+      charged = chargeResult.status === 'APPROVED';
+
+      return ok(updated);
+    } finally {
+      if (!charged) {
+        await this.productRepository.releaseStock(
+          transaction.productId,
+          transaction.quantity,
+        );
+      }
     }
-
-    return ok(updated);
   }
 
   private async charge(

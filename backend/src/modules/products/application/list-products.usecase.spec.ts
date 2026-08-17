@@ -5,7 +5,8 @@ describe('ListProductsUseCase', () => {
   const mockProductRepo = {
     findAll: jest.fn(),
     findById: jest.fn(),
-    decreaseStock: jest.fn(),
+    reserveStock: jest.fn(),
+    releaseStock: jest.fn(),
   };
   const useCase = new ListProductsUseCase(mockProductRepo as any);
 

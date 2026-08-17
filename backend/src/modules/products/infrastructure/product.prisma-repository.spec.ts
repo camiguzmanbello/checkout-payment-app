@@ -7,6 +7,7 @@ describe('ProductPrismaRepository', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
   };
   const repository = new ProductPrismaRepository(mockPrisma as any);
@@ -53,15 +54,37 @@ describe('ProductPrismaRepository', () => {
     await expect(repository.findById('missing')).resolves.toBeNull();
   });
 
-  it('decrements the stock by the given quantity', async () => {
-    mockPrisma.product.update.mockResolvedValue({ ...row, stock: 3 });
+  // La condición tiene que viajar en el WHERE. Verificar el stock por separado
+  // y descontar después deja pasar dos compras simultáneas sobre la misma
+  // unidad, que es exactamente lo que esta consulta evita.
+  it('takes the stock and the condition in a single statement', async () => {
+    mockPrisma.product.updateMany.mockResolvedValue({ count: 1 });
 
-    const product = await repository.decreaseStock('p1', 2);
+    const reserved = await repository.reserveStock('p1', 2);
+
+    expect(mockPrisma.product.updateMany).toHaveBeenCalledWith({
+      where: { id: 'p1', stock: { gte: 2 } },
+      data: { stock: { decrement: 2 } },
+    });
+    expect(reserved).toBe(true);
+  });
+
+  it('reports no reservation when no row matched, leaving the stock alone', async () => {
+    mockPrisma.product.updateMany.mockResolvedValue({ count: 0 });
+
+    const reserved = await repository.reserveStock('p1', 2);
+
+    expect(reserved).toBe(false);
+  });
+
+  it('gives the quantity back on release', async () => {
+    mockPrisma.product.update.mockResolvedValue({ ...row, stock: 7 });
+
+    await repository.releaseStock('p1', 2);
 
     expect(mockPrisma.product.update).toHaveBeenCalledWith({
       where: { id: 'p1' },
-      data: { stock: { decrement: 2 } },
+      data: { stock: { increment: 2 } },
     });
-    expect(product.stock).toBe(3);
   });
 });

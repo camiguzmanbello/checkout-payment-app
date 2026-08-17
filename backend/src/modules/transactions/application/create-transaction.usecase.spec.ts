@@ -5,7 +5,8 @@ describe('CreateTransactionUseCase', () => {
   const mockProductRepo = {
     findById: jest.fn(),
     findAll: jest.fn(),
-    decreaseStock: jest.fn(),
+    reserveStock: jest.fn(),
+    releaseStock: jest.fn(),
   };
   const mockTransactionRepo = {
     create: jest.fn(),

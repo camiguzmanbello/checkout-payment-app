@@ -1,8 +1,9 @@
 # Checkout App
 
 Una tienda con pago real: eliges un producto, ingresas tu tarjeta y tus datos de
-entrega, confirmas y el cobro se procesa contra la pasarela de pagos. El stock
-baja únicamente cuando el cobro queda aprobado.
+entrega, confirmas y el cobro se procesa contra la pasarela de pagos. El stock se
+reserva antes de cobrar y se libera si el pago no prospera, así que nunca se
+cobra por algo que ya no está.
 
 
 
@@ -91,7 +92,7 @@ propio botón.
 | Estado | Qué significa |
 | --- | --- |
 | `PENDING` | Creada, todavía sin cobrar |
-| `APPROVED` | Cobrada. El único estado que descuenta stock |
+| `APPROVED` | Cobrada. El stock reservado antes del cobro se queda descontado |
 | `DECLINED` | La pasarela rechazó la tarjeta |
 | `ERROR` | No se pudo completar, o seguía procesándose cuando venció la espera. Se guarda el id de la pasarela para poder reconciliar |
 
@@ -173,7 +174,7 @@ cd frontend && npm run test:cov
 
 | | Backend | Frontend |
 | --- | --- | --- |
-| Tests | 102 | 159 |
+| Tests | 110 | 159 |
 | Statements | 100% | 91% |
 | Ramas | 95% | 87% |
 

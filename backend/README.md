@@ -137,8 +137,8 @@ the "Swagger URL".
 - `POST /customers` — creates a customer
 - `POST /deliveries` — creates delivery details
 - `POST /transactions` — creates a PENDING transaction (checks stock, computes fees)
-- `POST /transactions/:id/pay` — tokenizes the card, charges it, waits for the
-  final status and decrements stock on approval (see below)
+- `POST /transactions/:id/pay` — reserves the stock, tokenizes the card, charges
+  it and waits for the final status (see below)
 - `GET /transactions/:id` — reads the current status
 
 ## Payment flow
@@ -162,12 +162,31 @@ the "Swagger URL".
 
 Because of step 4 the endpoint answers in seconds rather than milliseconds.
 
+### Stock is reserved, not deducted at the end
+
+Step 1 of `PayTransactionUseCase` happens before any of the above: it takes the
+stock with a conditional `updateMany` (`where stock >= quantity`), so the check
+and the deduction are one statement and two simultaneous purchases cannot both
+pass it. No row affected means `INSUFFICIENT_STOCK`, returned without ever
+calling the provider — nobody is charged for a unit that is gone.
+
+Deducting only on `APPROVED` left a window: between the check at
+`POST /transactions` and the charge, another buyer could take the last unit, and
+the money was taken anyway. Anything after the reservation that is not an
+approved charge — `DECLINED`, `ERROR`, or an exception escaping the database
+write — releases it again through a `finally`, so a held unit cannot outlive the
+transaction holding it.
+
+The reservation lives only inside the request. A process killed mid-charge still
+leaks it, which is the honest limit of doing this without a scheduled sweep over
+stale `PENDING` transactions.
+
 ### Transaction statuses
 
 | Status | Meaning |
 | --- | --- |
 | `PENDING` | Created locally, not charged yet |
-| `APPROVED` | Charged. This is the only status that decrements stock |
+| `APPROVED` | Charged. The stock reserved before the charge stays deducted |
 | `DECLINED` | The provider rejected the card |
 | `ERROR` | The charge could not be completed, or it was still PENDING when the polling budget expired. The provider transaction id is stored anyway so the charge can be reconciled |
 
