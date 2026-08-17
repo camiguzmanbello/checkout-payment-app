@@ -10,14 +10,11 @@ baja únicamente cuando el cobro queda aprobado.
 
 ## Enlaces
 
-> ⚠️ **Temporal.** El proyecto todavía no está desplegado; estas son las
-> direcciones locales. Se reemplazan por las definitivas al publicar.
-
 | Qué | Dónde | Estado |
 | --- | --- | --- |
-| Aplicación web | `http://localhost:5173` | Local |
-| API | `http://localhost:3000` | Local |
-| Documentación de la API (Swagger) | `http://localhost:3000/api-docs` | Local |
+| Aplicación web | https://checkout-payment-app-theta.vercel.app | En producción |
+| API | https://checkout-backend-k7ka.onrender.com | En producción |
+| Documentación de la API (Swagger) | https://checkout-backend-k7ka.onrender.com/api-docs | En producción |
 | Repositorio | https://github.com/camiguzmanbello/checkout-payment-app | Público |
 
 > ℹ️ **La primera petición puede tardar.** El backend corre en el plan gratuito
@@ -27,17 +24,6 @@ baja únicamente cuando el cobro queda aprobado.
 > aparecer o el primer pago se siente lento. Las peticiones siguientes ya van a
 > velocidad normal. Es el comportamiento propio del plan gratuito, no un fallo
 > de la aplicación.
-
-<!--
-Al desplegar, reemplaza la tabla de arriba por esta:
-
-| Qué | Dónde |
-| --- | --- |
-| Aplicación web | https://TU-DOMINIO |
-| API | https://TU-API |
-| Documentación de la API | https://TU-API/api-docs |
-| Repositorio | https://github.com/camiguzmanbello/checkout-payment-app |
--->
 
 ---
 
@@ -186,7 +172,7 @@ cd frontend && npm run test:cov
 
 | | Backend | Frontend |
 | --- | --- | --- |
-| Tests | 102 | 147 |
+| Tests | 102 | 153 |
 | Statements | 100% | 91% |
 | Ramas | 95% | 87% |
 

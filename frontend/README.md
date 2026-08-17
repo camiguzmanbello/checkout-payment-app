@@ -3,6 +3,17 @@
 React + Redux Toolkit (Flux), mobile-first, and resilient to a refresh through
 localStorage.
 
+## In production
+
+| | |
+| --- | --- |
+| App | https://checkout-payment-app-theta.vercel.app |
+| API it talks to | https://checkout-backend-k7ka.onrender.com |
+
+Deployed on Vercel. `VITE_API_URL` has to point at the API **before** the build:
+Vite bakes `VITE_*` variables into the bundle, so changing it later needs a
+redeploy. That same origin must be listed in the backend's `FRONTEND_ORIGIN`.
+
 ## Structure
 
 ```
@@ -217,7 +228,7 @@ What each suite covers:
 | `App.test.jsx` | One screen at a time, and the result replacing the catalogue |
 | `checkoutSlice.test.js` | Reducers plus the three thunks, on success and on failure |
 | `client.test.js` | Every endpoint, and how backend errors are surfaced |
-| `localStorage.test.js`, `store.test.js` | Rehydration, and that card data never reaches disk |
+| `localStorage.test.js`, `store.test.js` | Rehydration, that card data never reaches disk, and that a reloaded summary falls back to the form |
 | `ThemeToggle.test.jsx` | Following the system theme, pinning a choice, and surviving storage being unavailable |
 
 `src/main.jsx` and `src/api/apiBaseUrl.js` are excluded from coverage: the first
@@ -231,6 +242,17 @@ from what gets persisted to localStorage. If the buyer refreshes halfway through
 the form they get product, customer and delivery back, but have to type the card
 again. Nothing about the card reaches the database either: the `Transaction`
 model holds amounts, status and relations, and no card field at all.
+
+That exclusion is why `loadState` refuses to restore the summary step. It is the
+only step that needs the card to move forward, so resuming it left a `Pagar`
+button that blew up on `cardData.number`; the thunk rejection then landed on the
+result screen as *"no pudimos confirmar tu pago"*, over a transaction the
+provider had never even been asked about. Rehydrating a summary now returns to
+the form with `cardReentryNeeded` set, which is what draws the notice saying the
+card was dropped and that nothing was charged. The stale `PENDING` transaction is
+released — submitting again creates a fresh one, and `PENDING` never moved stock.
+`confirmPayment` also carries a `condition` guard so no other path can turn a
+missing card into what looks like a failed charge.
 
 The card drawn on the summary shows the brand, the holder and the last four
 digits. The expiry is masked as `••/••` on purpose: on its own it charges

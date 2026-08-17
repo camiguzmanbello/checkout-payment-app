@@ -25,6 +25,20 @@ Write use cases return a `Result<T, E>` (`src/common/result.ts`) instead of
 throwing on the expected failure path; the controller is what turns a failure
 into an HTTP status.
 
+## In production
+
+| | |
+| --- | --- |
+| API | https://checkout-backend-k7ka.onrender.com |
+| Swagger | https://checkout-backend-k7ka.onrender.com/api-docs |
+
+Hosted on Render's free tier, which suspends the instance after a while without
+traffic: the first request has to wake it up and can take a few extra seconds.
+
+`FRONTEND_ORIGIN` must list the deployed frontend
+(`https://checkout-payment-app-theta.vercel.app`) or the browser blocks every
+call with a CORS error — see the variable table below.
+
 ## How to run
 
 ```bash
