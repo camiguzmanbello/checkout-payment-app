@@ -242,12 +242,23 @@ export default function CheckoutModal() {
           </button>
         </header>
 
+        {/* Tres frases seguidas en tono de alerta se leían como un bloque: lo
+            importante — que nadie cobró nada — quedaba enterrado en el medio.
+            Ahora cada idea va en su línea y el texto largo baja a color normal,
+            que el color de alerta es para el titular. */}
         {cardReentryNeeded && (
-          <p className="form-notice" role="status">
-            Por seguridad no guardamos los datos de tu tarjeta, así que al recargar
-            la página se borraron. No se hizo ningún cobro: vuelve a ingresarlos
-            para continuar.
-          </p>
+          <div className="form-notice" role="status">
+            <span className="form-notice__icon" aria-hidden="true">
+              🔒
+            </span>
+            <div className="form-notice__body">
+              <strong className="form-notice__title">Vuelve a ingresar tu tarjeta</strong>
+              <p className="form-notice__detail">
+                Por seguridad no la guardamos, así que al recargar la página se borró.
+              </p>
+              <p className="form-notice__reassurance">No se hizo ningún cobro.</p>
+            </div>
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="checkout-form" noValidate>

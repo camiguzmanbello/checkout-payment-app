@@ -313,7 +313,8 @@ describe('CheckoutModal', () => {
     it('explains why the card fields are empty again', () => {
       renderWithNotice();
 
-      expect(screen.getByRole('status')).toHaveTextContent(/vuelve a ingresarlos/i);
+      expect(screen.getByRole('status')).toHaveTextContent(/vuelve a ingresar tu tarjeta/i);
+      expect(screen.getByRole('status')).toHaveTextContent(/al recargar la página se borró/i);
     });
 
     it('says outright that nothing was charged', () => {
