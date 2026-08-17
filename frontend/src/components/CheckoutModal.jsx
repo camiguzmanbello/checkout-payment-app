@@ -51,13 +51,29 @@ const SANITIZERS = {
   address: (v) => v.slice(0, 200),
 };
 
+// Entrega y datos de contacto sí sobreviven a un refresh, así que el formulario
+// vuelve con ellos escritos en vez de en blanco. La tarjeta no: no se persiste,
+// y sus campos quedan vacíos a propósito.
+const formFrom = (customerData, deliveryData) => ({
+  ...EMPTY_FORM,
+  fullName: customerData?.fullName ?? '',
+  email: customerData?.email ?? '',
+  phone: customerData?.phone ?? deliveryData?.phone ?? '',
+  address: deliveryData?.address ?? '',
+  city: deliveryData?.city ?? '',
+  region: deliveryData?.region ?? '',
+});
+
 const YEARS = expiryYears();
 
 export default function CheckoutModal() {
   const dispatch = useDispatch();
-  const { selectedProduct, loading, error, cardReentryNeeded } = useSelector((s) => s.checkout);
+  const { selectedProduct, loading, error, cardReentryNeeded, customerData, deliveryData } =
+    useSelector((s) => s.checkout);
 
-  const [form, setForm] = useState(EMPTY_FORM);
+  // Se lee una sola vez, al montar: a partir de ahí el formulario es de quien lo
+  // está llenando y el store no vuelve a pisarle lo que escribe.
+  const [form, setForm] = useState(() => formFrom(customerData, deliveryData));
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
 

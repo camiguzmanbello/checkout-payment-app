@@ -172,7 +172,7 @@ cd frontend && npm run test:cov
 
 | | Backend | Frontend |
 | --- | --- | --- |
-| Tests | 102 | 155 |
+| Tests | 102 | 159 |
 | Statements | 100% | 91% |
 | Ramas | 95% | 87% |
 

@@ -16,7 +16,8 @@ export default function CardReentryDialog({ onAccept }) {
         </h2>
         <p className="dialog__detail" id="card-reentry-detail">
           Por seguridad no guardamos los datos de tu tarjeta, así que se borraron al
-          recargar la página. No se realizó ningún cobro.
+          recargar la página. Tus datos de entrega siguen ahí y no se realizó ningún
+          cobro.
         </p>
         {/* "Aceptar" y no "Continuar": el botón de enviar el formulario que
             queda detrás ya dice Continuar, y dos botones con el mismo nombre a

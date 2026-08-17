@@ -350,4 +350,67 @@ describe('CheckoutModal', () => {
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
   });
+
+  // Retypear la dirección entera después de un refresh es justo lo que hace que
+  // alguien abandone la compra. Sólo la tarjeta se pierde, porque no se guarda.
+  describe('coming back to the form with saved details', () => {
+    const renderPrefilled = () => {
+      const store = configureStore({
+        reducer: { checkout: checkoutReducer },
+        preloadedState: {
+          checkout: {
+            ...checkoutReducer(undefined, { type: '@@INIT' }),
+            step: 'checkout',
+            selectedProduct: product,
+            customerData: { fullName: 'Maria Camila', email: 'maria@gmail.com', phone: '+573000000000' },
+            deliveryData: { address: 'Calle 100 #15-20', city: 'Armenia', region: 'Quindío' },
+          },
+        },
+      });
+      const utils = render(
+        <Provider store={store}>
+          <CheckoutModal />
+        </Provider>,
+      );
+      return { store, ...utils };
+    };
+
+    it('brings the delivery and contact details back already filled in', () => {
+      renderPrefilled();
+
+      expect(valueOf('fullName')).toBe('Maria Camila');
+      expect(valueOf('email')).toBe('maria@gmail.com');
+      expect(valueOf('phone')).toBe('+573000000000');
+      expect(valueOf('address')).toBe('Calle 100 #15-20');
+      expect(valueOf('region')).toBe('Quindío');
+      expect(valueOf('city')).toBe('Armenia');
+    });
+
+    it('leaves the card blank, since it is never persisted', () => {
+      renderPrefilled();
+
+      expect(valueOf('cardNumber')).toBe('');
+      expect(valueOf('cvc')).toBe('');
+    });
+
+    it('lets what came back be edited', () => {
+      renderPrefilled();
+
+      typeIn('address', 'Carrera 7 #45-10');
+
+      expect(valueOf('address')).toBe('Carrera 7 #45-10');
+    });
+
+    // La ciudad depende del departamento, así que el prellenado no puede dejar
+    // la lista bloqueada ni con la ciudad de otro departamento.
+    it('keeps the city list usable, and clears the city when the region changes', () => {
+      renderPrefilled();
+
+      chooseIn('region', 'Antioquia');
+
+      expect(valueOf('region')).toBe('Antioquia');
+      expect(valueOf('city')).toBe('');
+      expect(openSelect('city').length).toBeGreaterThan(0);
+    });
+  });
 });

@@ -240,8 +240,10 @@ cannot be parsed by Jest.
 
 Card data (`cardData`) lives only in memory (Redux) and is explicitly excluded
 from what gets persisted to localStorage. If the buyer refreshes halfway through
-the form they get product, customer and delivery back, but have to type the card
-again. Nothing about the card reaches the database either: the `Transaction`
+the form, `CheckoutModal` seeds its state from the saved customer and delivery
+records, so those fields come back already filled in and stay editable; the card
+fields are the only ones left blank, because there is nothing to restore them
+from. Nothing about the card reaches the database either: the `Transaction`
 model holds amounts, status and relations, and no card field at all.
 
 That exclusion is why `loadState` refuses to restore the summary step. It is the
