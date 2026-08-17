@@ -213,4 +213,18 @@ describe('confirmPayment', () => {
     expect(state.step).toBe('result');
     expect(state.error).toBe('Gateway timeout');
   });
+
+  // Última red: sin tarjeta no se le pide nada al proveedor. Antes el thunk
+  // explotaba leyendo cardData.number y el TypeError se dibujaba como un pago
+  // fallido, cuando en realidad no se intentó ningún cobro.
+  it('does not call the gateway when the card data is missing', async () => {
+    const store = makeStore({ ...paying, cardData: null });
+
+    await store.dispatch(confirmPayment());
+    const state = store.getState().checkout;
+
+    expect(fetch).not.toHaveBeenCalled();
+    expect(state.step).toBe('summary');
+    expect(state.error).toBeNull();
+  });
 });

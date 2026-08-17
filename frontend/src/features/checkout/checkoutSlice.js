@@ -11,6 +11,7 @@ const initialState = {
   deliveryData: null, // { address, city, region, phone }
   customerData: null, // { fullName, email, phone }
   transaction: null, // { id, reference, totalAmount, status, ... }
+  cardReentryNeeded: false, // true cuando un refresh en el resumen se llevó la tarjeta
   loading: false,
   error: null,
 };
@@ -48,6 +49,15 @@ export const confirmPayment = createAsyncThunk(
       cardHolder: cardData.cardHolder,
       customerEmail: customerData.email,
     });
+  },
+  {
+    // Sin tarjeta no hay nada que cobrar. Sin esta guarda el thunk explotaba al
+    // leer cardData.number y el fallo se dibujaba como un pago fallido, que es
+    // lo contrario de lo que pasó: al proveedor nunca le llegó nada.
+    condition: (_, { getState }) => {
+      const { checkout } = getState();
+      return Boolean(checkout.cardData && checkout.transaction);
+    },
   },
 );
 
@@ -97,6 +107,7 @@ const checkoutSlice = createSlice({
       .addCase(submitCheckoutInfo.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.cardReentryNeeded = false;
       })
       .addCase(submitCheckoutInfo.fulfilled, (state, action) => {
         state.loading = false;

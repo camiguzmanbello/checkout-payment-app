@@ -287,4 +287,45 @@ describe('CheckoutModal', () => {
 
     expect(store.getState().checkout.step).toBe('product');
   });
+
+  // Quien recarga en el resumen aterriza acá de vuelta. Sin explicación parece
+  // que la app perdió sus datos sola, o peor, que le cobraron y algo falló.
+  describe('after a reload wiped the card on the summary step', () => {
+    const renderWithNotice = () => {
+      const store = configureStore({
+        reducer: { checkout: checkoutReducer },
+        preloadedState: {
+          checkout: {
+            ...checkoutReducer(undefined, { type: '@@INIT' }),
+            step: 'checkout',
+            selectedProduct: product,
+            cardReentryNeeded: true,
+          },
+        },
+      });
+      return render(
+        <Provider store={store}>
+          <CheckoutModal />
+        </Provider>,
+      );
+    };
+
+    it('explains why the card fields are empty again', () => {
+      renderWithNotice();
+
+      expect(screen.getByRole('status')).toHaveTextContent(/vuelve a ingresarlos/i);
+    });
+
+    it('says outright that nothing was charged', () => {
+      renderWithNotice();
+
+      expect(screen.getByRole('status')).toHaveTextContent(/no se hizo ningún cobro/i);
+    });
+
+    it('stays quiet when the card was never lost', () => {
+      renderModal();
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    });
+  });
 });

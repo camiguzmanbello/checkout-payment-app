@@ -42,15 +42,41 @@ describe('localStorage persistence', () => {
   });
 
   it('restores the progress with the card slot emptied', () => {
-    saveState(fullState);
+    saveState({ checkout: { ...fullState.checkout, step: 'checkout' } });
 
     const restored = loadState();
 
-    expect(restored.checkout.step).toBe('summary');
+    expect(restored.checkout.step).toBe('checkout');
     expect(restored.checkout.quantity).toBe(2);
     expect(restored.checkout.cardData).toBeNull();
     expect(restored.checkout.loading).toBe(false);
     expect(restored.checkout.error).toBeNull();
+  });
+
+  // El resumen no se puede reanudar: pagar desde ahí necesita la tarjeta, que
+  // es justo lo que no se persiste. Reanudarlo dejaba un botón "Pagar" que
+  // reventaba y se mostraba como un pago fallido sin haber cobrado nada.
+  it('sends a reloaded summary back to the form, since the card is gone', () => {
+    saveState(fullState);
+
+    const restored = loadState();
+
+    expect(restored.checkout.step).toBe('checkout');
+    expect(restored.checkout.cardReentryNeeded).toBe(true);
+    // La transacción vieja quedó en PENDING: el formulario crea una nueva.
+    expect(restored.checkout.transaction).toBeNull();
+    // Lo que sí se puede reponer se conserva.
+    expect(restored.checkout.selectedProduct).toEqual({ id: 'p1' });
+    expect(restored.checkout.deliveryData).toEqual({ address: 'Calle 100' });
+  });
+
+  it('leaves the result step alone: it needs no card to be shown again', () => {
+    saveState({ checkout: { ...fullState.checkout, step: 'result' } });
+
+    const restored = loadState();
+
+    expect(restored.checkout.step).toBe('result');
+    expect(restored.checkout.transaction).toEqual({ id: 't1' });
   });
 
   it('ignores a corrupted payload instead of breaking the app', () => {

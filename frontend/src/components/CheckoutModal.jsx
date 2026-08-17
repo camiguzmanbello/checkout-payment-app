@@ -53,7 +53,7 @@ const YEARS = expiryYears();
 
 export default function CheckoutModal() {
   const dispatch = useDispatch();
-  const { selectedProduct, loading, error } = useSelector((s) => s.checkout);
+  const { selectedProduct, loading, error, cardReentryNeeded } = useSelector((s) => s.checkout);
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [touched, setTouched] = useState({});
@@ -241,6 +241,14 @@ export default function CheckoutModal() {
             ✕
           </button>
         </header>
+
+        {cardReentryNeeded && (
+          <p className="form-notice" role="status">
+            Por seguridad no guardamos los datos de tu tarjeta, así que al recargar
+            la página se borraron. No se hizo ningún cobro: vuelve a ingresarlos
+            para continuar.
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="checkout-form" noValidate>
           <fieldset>

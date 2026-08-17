@@ -1419,6 +1419,19 @@ button:disabled {
   font-weight: 600;
 }
 
+/* Aviso, no error: nada salió mal, solo hay que reponer un dato. Va fuera del
+   formulario, así que trae su propio margen para alinearse con los campos. */
+.form-notice {
+  background: var(--color-warning-soft);
+  border: 1px solid var(--color-warning);
+  color: var(--color-warning);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin: var(--space-4) var(--space-4) calc(var(--space-4) * -1);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
 /* --------------------------------------------------------------- summary -- */
 
 .sheet-body {

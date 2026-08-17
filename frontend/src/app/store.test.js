@@ -19,11 +19,11 @@ describe('store', () => {
   });
 
   it('rehydrates the progress saved by a previous session', async () => {
-    localStorage.setItem(KEY, JSON.stringify({ step: 'summary', quantity: 3 }));
+    localStorage.setItem(KEY, JSON.stringify({ step: 'checkout', quantity: 3 }));
 
     const store = await loadStore();
 
-    expect(store.getState().checkout.step).toBe('summary');
+    expect(store.getState().checkout.step).toBe('checkout');
     expect(store.getState().checkout.quantity).toBe(3);
   });
 
