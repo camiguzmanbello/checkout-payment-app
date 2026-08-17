@@ -210,15 +210,15 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-147 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
+166 tests across 12 suites. Nothing reaches the network: `fetch` is mocked, so
 the suite is deterministic and runs in CI without a backend.
 
 | Metric | Coverage |
 | --- | --- |
-| Statements | 91.03% |
-| Lines | 93.43% |
-| Functions | 89.5% |
-| Branches | 86.93% |
+| Statements | 91.46% |
+| Lines | 93.82% |
+| Functions | 90.47% |
+| Branches | 87.66% |
 
 What each suite covers:
 
@@ -228,7 +228,7 @@ What each suite covers:
 | `colombia.js` (via the above) | The dataset is exercised by the location rules |
 | `CheckoutModal.test.jsx` | Per-field errors, progressive unlocking, the brand logo inside the field, the option lists, and closing behaviour |
 | `SummaryBackdrop.test.jsx` | Line items named in Spanish, amounts in COP, the drawn card showing brand and last four only, the locked state while paying |
-| `FinalStatus.test.jsx` | The three outcomes, including unconfirmed as distinct from declined |
+| `FinalStatus.test.jsx` | The four outcomes, including unconfirmed and sold out as distinct from declined |
 | `ProductPage.test.jsx` | The landing sections, which products get featured, and disabling a sold out one |
 | `FeaturedCarousel.test.jsx` | Moving with arrows, dots and keys, autoplay and its pauses |
 | `App.test.jsx` | One screen at a time, and the result replacing the catalogue |

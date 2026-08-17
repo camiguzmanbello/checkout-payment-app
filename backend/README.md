@@ -213,7 +213,7 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-102 tests across 20 suites. No test reaches the network or the database: the
+110 tests across 20 suites. No test reaches the network or the database: the
 gateway is exercised with `fetch` mocked and the repositories with the Prisma
 client mocked, so the suite is deterministic and can run in CI without any
 credentials.
@@ -223,7 +223,7 @@ credentials.
 | Statements | 100% |
 | Lines | 100% |
 | Functions | 100% |
-| Branches | 95.55% |
+| Branches | 95.74% |
 
 The only uncovered branches are the `??` fallbacks for `PORT` and
 `FRONTEND_ORIGIN` in `main.ts`: importing that file pulls in `@prisma/client`,

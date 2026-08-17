@@ -167,20 +167,97 @@ localStorage, del que se excluyen a propósito los datos de tarjeta.
 
 ## Pruebas
 
+Las dos mitades del proyecto están probadas con Jest: **276 pruebas en total**,
+110 en el backend y 166 en el frontend. Ninguna toca la red ni la base de datos
+—la pasarela se ejercita con `fetch` simulado y los repositorios con el cliente
+de Prisma simulado—, así que la suite es determinista y corre en CI sin una sola
+credencial.
+
 ```bash
-cd backend  && npm run test:cov
-cd frontend && npm run test:cov
+cd backend  && npm run test        # npm run test:cov para el reporte de cobertura
+cd frontend && npm run test        # npm run test:cov para el reporte de cobertura
 ```
+
+### Cobertura
 
 | | Backend | Frontend |
 | --- | --- | --- |
-| Tests | 110 | 166 |
-| Statements | 100% | 91% |
-| Ramas | 95% | 87% |
+| Pruebas | 110, en 20 suites | 166, en 12 suites |
+| Sentencias | 100% | 91.46% |
+| Líneas | 100% | 93.82% |
+| Funciones | 100% | 90.47% |
+| Ramas | 95.74% | 87.66% |
 
-Ninguna prueba toca la red ni la base de datos: la pasarela se ejercita con
-`fetch` simulado y los repositorios con el cliente de Prisma simulado, así que
-la suite corre en CI sin credenciales.
+### Qué se evalúa en el backend
+
+Cada capa de la arquitectura hexagonal se prueba por separado, con sus vecinos
+sustituidos por dobles:
+
+| Capa | Qué se fija |
+| --- | --- |
+| Casos de uso | Las reglas de negocio: precios y montos calculados al crear la transacción, producto inexistente, stock insuficiente, y todo el recorrido del cobro |
+| Adaptador de la pasarela | La firma de integridad, la tokenización, el sondeo de un cobro `PENDING` y qué se guarda cuando la espera se agota |
+| Repositorios (Prisma) | El mapeo de fila a entidad, la reserva y liberación de stock, y que una transacción nazca siempre `PENDING` |
+| Controladores y DTOs | La traducción de un fallo de dominio a un estado HTTP, y la validación de entrada (UUIDs, cantidades, nombres con tilde) |
+| Cableado y arranque | Que cada puerto quede atado a su adaptador, el rate limiting como guard global, Helmet, el CORS restringido y Swagger en `/api-docs` |
+| Transversales | Los combinadores del `Result<T, E>`, el filtro de errores que nunca filtra trazas y el ciclo de vida de la conexión a Postgres |
+
+Lo que más se cuidó es el cobro, porque es donde el dinero y el inventario se
+pueden desincronizar. Las pruebas de `pay-transaction.usecase` fijan que:
+
+- el stock se **reserva antes** de tocar la pasarela;
+- si el producto se agotó mientras tanto, **nunca se llega a la pasarela**, así
+  que al comprador no se le cobra nada;
+- ante un rechazo, un error de la pasarela, un fallo de tokenización, una caída
+  de red o una excepción al guardar el resultado, **el stock se devuelve**;
+- se devuelve **exactamente una vez**, nunca dos por el mismo fallo;
+- solo un pago aprobado deja el descuento en firme.
+
+Y en `payment-gateway-http.adapter`, que un cobro que queda procesándose se
+sondea hasta su estado final, que un sondeo fallido se reintenta en vez de dar
+el cobro por perdido, que `VOIDED` no cuenta como éxito, y que si el
+presupuesto de espera se agota se guarda igual el id de la pasarela — que es lo
+único que después permite reconciliar el cobro.
+
+### Qué se evalúa en el frontend
+
+Cada archivo `*.test.js(x)` vive junto al que cubre:
+
+| Suite | Qué se fija |
+| --- | --- |
+| `cardValidation.test.js` | Luhn, detección de marca, vigencia solo futura, largo de CVC por marca, formato de correo y que la ciudad pertenezca a su departamento |
+| `CheckoutModal.test.jsx` | El error por campo al salir del foco, el desbloqueo progresivo, el logo de la marca dentro del campo, las listas de opciones con teclado y búsqueda sin tildes, y el cierre del formulario |
+| `SummaryBackdrop.test.jsx` | El desglose en pesos colombianos, la tarjeta dibujada con marca y últimos cuatro, la vigencia enmascarada y el bloqueo de los botones mientras se cobra |
+| `FinalStatus.test.jsx` | Los cuatro desenlaces, incluido distinguir *agotado* y *sin confirmar* de un rechazo |
+| `ProductPage.test.jsx` | Las secciones de la landing, qué productos se destacan y el botón deshabilitado cuando no hay stock |
+| `FeaturedCarousel.test.jsx` | Avance con flechas, puntos y teclado, autoplay con sus pausas, y el respeto por `prefers-reduced-motion` |
+| `App.test.jsx` | Una pantalla a la vez, y el resultado reemplazando al catálogo |
+| `checkoutSlice.test.js` | Los reducers y los tres thunks, en éxito y en fallo |
+| `client.test.js` | Cada endpoint y cómo se traduce un error del backend a un mensaje legible |
+| `localStorage.test.js`, `store.test.js` | La rehidratación, que los datos de tarjeta jamás lleguen a disco, y el modo privado o el almacenamiento corrupto |
+| `ThemeToggle.test.jsx` | Seguir la preferencia del sistema, fijar una elección y recordarla |
+
+Hay tres comportamientos delicados que tienen prueba propia porque son fáciles
+de romper sin notarlo: que **la tarjeta nunca se persista** (ni siquiera
+enmascarada), que un **resumen recargado vuelva al formulario** —porque la
+tarjeta ya no está en memoria— avisándole al comprador que no se cobró nada, y
+que **un producto agotado no se muestre como un pago sin confirmar**.
+
+### Qué queda fuera, y por qué
+
+- En el backend, las únicas ramas sin cubrir son los valores por defecto de
+  `PORT` y `FRONTEND_ORIGIN` en `main.ts`: importar ese archivo arrastra
+  `@prisma/client`, que carga el `.env` y vuelve a poblar ambas variables, así
+  que el camino del default no se puede alcanzar desde una prueba.
+- En el frontend, `src/main.jsx` queda excluido porque solo monta la app, y
+  `src/api/apiBaseUrl.js` porque usa `import.meta`, que Jest no puede parsear:
+  en las pruebas se reemplaza por un stub.
+- **No hay pruebas end to end** contra un navegador real y una base de datos
+  real. Todo el flujo está cubierto por partes, pero un recorrido completo
+  automatizado sigue siendo el siguiente paso natural de la suite.
+
+El detalle de cada suite está en [`backend/README.md`](backend/README.md#tests)
+y [`frontend/README.md`](frontend/README.md#tests).
 
 ---
 
