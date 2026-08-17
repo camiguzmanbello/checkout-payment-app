@@ -12,6 +12,7 @@ const initialState = {
   customerData: null, // { fullName, email, phone }
   transaction: null, // { id, reference, totalAmount, status, ... }
   cardReentryNeeded: false, // true cuando un refresh en el resumen se llevó la tarjeta
+  outOfStock: false, // el backend rechazó por stock, sin haber cobrado nada
   loading: false,
   error: null,
 };
@@ -126,6 +127,7 @@ const checkoutSlice = createSlice({
       .addCase(confirmPayment.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.outOfStock = false;
       })
       .addCase(confirmPayment.fulfilled, (state, action) => {
         state.loading = false;
@@ -134,8 +136,15 @@ const checkoutSlice = createSlice({
       })
       .addCase(confirmPayment.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
         state.step = 'result';
+
+        // El backend reserva el stock antes de llamar a la pasarela, así que un
+        // rechazo por stock llega sin que se haya cobrado nada. Eso no es el
+        // "no sabemos si te cobraron" de un ERROR: es un desenlace cerrado y
+        // merece su propia pantalla. El código crudo no se muestra, porque el
+        // mensaje del desenlace ya dice todo lo que hay que decir.
+        state.outOfStock = action.error.message === 'INSUFFICIENT_STOCK';
+        state.error = state.outOfStock ? null : action.error.message;
       });
   },
 });

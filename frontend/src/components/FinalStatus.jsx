@@ -24,13 +24,26 @@ const OUTCOMES = {
     detail:
       'No recibimos una respuesta definitiva del proveedor. Guarda la referencia y revisa tu estado de cuenta antes de volver a intentar.',
   },
+  // El backend reserva el stock antes de cobrar, así que acá se sabe con
+  // certeza que no hubo cobro. No hay nada que reconciliar y la referencia
+  // sobraría: mostrarla invitaría a buscar un movimiento que no existe.
+  OUT_OF_STOCK: {
+    tone: 'failure',
+    icon: '✕',
+    title: 'Se agotó mientras pagabas',
+    detail:
+      'Este producto se agotó mientras completabas tu compra. No se realizó ningún cobro.',
+    hideReference: true,
+  },
 };
 
 export default function FinalStatus() {
   const dispatch = useDispatch();
-  const { transaction, error } = useSelector((s) => s.checkout);
+  const { transaction, error, outOfStock } = useSelector((s) => s.checkout);
 
-  const status = transaction?.status ?? 'ERROR';
+  // El rechazo por stock no deja rastro en la transacción — sigue PENDING,
+  // porque nunca se cobró — así que el desenlace no se puede leer de ahí.
+  const status = outOfStock ? 'OUT_OF_STOCK' : transaction?.status ?? 'ERROR';
   const outcome = OUTCOMES[status] ?? OUTCOMES.ERROR;
 
   const handleContinue = () => {
@@ -46,7 +59,7 @@ export default function FinalStatus() {
       <h1>{outcome.title}</h1>
       <p className="result-detail">{outcome.detail}</p>
 
-      {transaction?.reference && (
+      {transaction?.reference && !outcome.hideReference && (
         <p className="reference">
           Referencia: <strong>{transaction.reference}</strong>
         </p>

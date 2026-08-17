@@ -81,10 +81,13 @@ while the result replaces the view entirely.
 2. **Card and delivery** — the payment form, described below.
 3. **Summary** — the product, the line items in plain Spanish, the total, the
    card being charged and the shipping address.
-4. **Result** — approved, declined, or unconfirmed. The last one is not the same
-   as a rejection: an `ERROR` can mean the card was charged without a definitive
-   answer coming back, so the screen keeps the reference and asks the buyer to
-   check their statement.
+4. **Result** — approved, declined, sold out, or unconfirmed. The last one is
+   not the same as a rejection: an `ERROR` can mean the card was charged without
+   a definitive answer coming back, so the screen keeps the reference and asks
+   the buyer to check their statement. Sold out is its opposite — the backend
+   reserves stock before charging, so an `INSUFFICIENT_STOCK` rejection is proof
+   no charge happened. That one drops the reference and says so outright, since
+   there is no movement to go looking for.
 
 ## Form rules
 

@@ -84,7 +84,7 @@ propio botón.
 2. **Tarjeta y entrega** — datos de pago y dirección, validados en el navegador
    y otra vez en el backend.
 3. **Resumen** — producto, subtotal, costo de servicio, costo de envío y total.
-4. **Estado final** — aprobado, rechazado o sin confirmar.
+4. **Estado final** — aprobado, rechazado, agotado o sin confirmar.
 5. **Vuelta al catálogo** — con el stock ya actualizado.
 
 ### Estados de una transacción
@@ -174,7 +174,7 @@ cd frontend && npm run test:cov
 
 | | Backend | Frontend |
 | --- | --- | --- |
-| Tests | 110 | 159 |
+| Tests | 110 | 166 |
 | Statements | 100% | 91% |
 | Ramas | 95% | 87% |
 

@@ -214,6 +214,56 @@ describe('confirmPayment', () => {
     expect(state.error).toBe('Gateway timeout');
   });
 
+  // El backend reserva el stock antes de cobrar, así que este rechazo llega sin
+  // cobro hecho. Tratarlo como un ERROR mandaría a revisar un estado de cuenta
+  // donde no hay nada que buscar.
+  describe('when the product sold out while paying', () => {
+    const soldOut = () => {
+      fetch.mockResolvedValueOnce(failing('INSUFFICIENT_STOCK'));
+      return makeStore(paying);
+    };
+
+    it('flags the outcome as out of stock', async () => {
+      const store = soldOut();
+
+      await store.dispatch(confirmPayment());
+      const state = store.getState().checkout;
+
+      expect(state.outOfStock).toBe(true);
+      expect(state.step).toBe('result');
+    });
+
+    it('does not surface the raw error code', async () => {
+      const store = soldOut();
+
+      await store.dispatch(confirmPayment());
+
+      expect(store.getState().checkout.error).toBeNull();
+    });
+
+    it('leaves any other failure as the unconfirmed outcome', async () => {
+      fetch.mockResolvedValueOnce(failing('Gateway timeout'));
+      const store = makeStore(paying);
+
+      await store.dispatch(confirmPayment());
+      const state = store.getState().checkout;
+
+      expect(state.outOfStock).toBe(false);
+      expect(state.error).toBe('Gateway timeout');
+    });
+
+    // Un reintento no puede arrancar arrastrando el desenlace del anterior.
+    it('clears the flag when a new attempt starts', async () => {
+      const store = soldOut();
+      await store.dispatch(confirmPayment());
+
+      fetch.mockResolvedValueOnce(ok({ id: 't1', status: 'APPROVED' }));
+      await store.dispatch(confirmPayment());
+
+      expect(store.getState().checkout.outOfStock).toBe(false);
+    });
+  });
+
   // Última red: sin tarjeta no se le pide nada al proveedor. Antes el thunk
   // explotaba leyendo cardData.number y el TypeError se dibujaba como un pago
   // fallido, cuando en realidad no se intentó ningún cobro.

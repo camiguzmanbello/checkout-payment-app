@@ -19,6 +19,7 @@ function renderStatus(checkout = {}) {
         deliveryData: null,
         customerData: null,
         transaction: { id: 't1', reference: 'TXN-1', status: 'APPROVED' },
+        outOfStock: false,
         loading: false,
         error: null,
         ...checkout,
@@ -68,6 +69,34 @@ describe('FinalStatus', () => {
   it('shows the error message when there is one', () => {
     renderStatus({ error: 'Gateway timeout' });
     expect(screen.getByText('Gateway timeout')).toBeInTheDocument();
+  });
+
+  // La transacción sigue PENDING porque nunca se cobró, así que sin la bandera
+  // esta pantalla caería en el genérico "revisa tu estado de cuenta".
+  describe('when the product sold out while paying', () => {
+    const soldOut = { outOfStock: true, transaction: { reference: 'TXN-1', status: 'PENDING' } };
+
+    it('says so plainly, and that nothing was charged', () => {
+      renderStatus(soldOut);
+
+      expect(screen.getByText('Se agotó mientras pagabas')).toBeInTheDocument();
+      expect(screen.getByText(/no se realizó ningún cobro/i)).toBeInTheDocument();
+    });
+
+    it('never sends the buyer to check a statement for a charge that never happened', () => {
+      renderStatus(soldOut);
+
+      expect(screen.queryByText(/revisa tu estado de cuenta/i)).not.toBeInTheDocument();
+      expect(screen.queryByText('No pudimos confirmar tu pago')).not.toBeInTheDocument();
+    });
+
+    // No hay cobro que reconciliar: la referencia sólo invitaría a buscar un
+    // movimiento que no existe.
+    it('hides the reference', () => {
+      renderStatus(soldOut);
+
+      expect(screen.queryByText('TXN-1')).not.toBeInTheDocument();
+    });
   });
 
   it('returns to the catalogue and refreshes the stock', () => {
