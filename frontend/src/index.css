@@ -1032,21 +1032,35 @@ button:disabled {
   padding-bottom: max(var(--space-5), env(safe-area-inset-bottom));
 }
 
-/* En el celular el formulario toma la pantalla completa desde arriba. Como hoja
-   pegada abajo dejaba asomando una franja del catálogo, y esa franja se leía
-   como si la pantalla de atrás siguiera activa. El resumen sí se queda como
-   hoja: es una capa de revisión sobre lo que ya se eligió, y ver el catálogo
-   detrás ayuda a ubicarse. */
+/* En el celular el formulario y el resumen toman la pantalla completa desde
+   arriba. Como hojas pegadas abajo dejaban asomando una franja del catálogo, y
+   esa franja se leía como si la pantalla de atrás siguiera activa. Los dos van
+   igual: son pasos del mismo flujo y cambiar de forma entre uno y otro se
+   siente como haber cambiado de lugar. */
 @media (max-width: 599px) {
-  .modal-overlay:not(.modal-overlay--stacked) {
+  .modal-overlay:not(.modal-overlay--stacked),
+  .backdrop {
     align-items: stretch;
   }
 
-  .modal {
+  .modal,
+  .backdrop-sheet {
     max-width: none;
     max-height: none;
     min-height: 100dvh;
     border-radius: 0;
+  }
+
+  /* A pantalla completa el resumen es más corto que el alto disponible, así que
+     el cuerpo se estira y los botones quedan abajo en vez de flotando a media
+     pantalla con un hueco debajo. */
+  .backdrop-sheet {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .backdrop-sheet .sheet-body {
+    flex: 1;
   }
 }
 

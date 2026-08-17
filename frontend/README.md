@@ -188,9 +188,11 @@ and grates in dark mode: `scrollbar-color` covers Firefox and the
 tokens.
 
 Mobile-first, with an `auto-fill` grid that goes from one column on a phone up
-to four on a wide screen. The modal is a bottom sheet on a phone and a centred
-dialog from 600px up. Fields are 16px so iOS does not zoom in on focus, controls
-share a 44px height, and there is support for `prefers-reduced-motion`.
+to four on a wide screen. The form and the summary both fill the screen on a
+phone and become centred dialogs from 600px up — as bottom sheets they left a
+strip of the catalogue showing, which read as if the screen behind were still
+live. Fields are 16px so iOS does not zoom in on focus, controls share a 44px
+height, and there is support for `prefers-reduced-motion`.
 
 `SelectField` exists because the native dropdown is drawn by the operating
 system, out of reach of the stylesheet, and it opened far larger than the rest

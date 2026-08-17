@@ -39,7 +39,8 @@ sobre la imagen; debajo, todos los productos con su stock.
 ### En el teléfono
 
 Todo está pensado mobile first: el carrusel se desliza con el dedo y el
-formulario se abre como hoja inferior.
+formulario ocupa la pantalla completa, para que no se confunda con el catálogo
+que quedó detrás.
 
 ![Landing en móvil](docs/screenshots/02-landing-mobile.png)
 
