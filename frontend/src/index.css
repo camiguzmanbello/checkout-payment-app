@@ -1419,63 +1419,33 @@ button:disabled {
   font-weight: 600;
 }
 
-/* Aviso, no error: nada salió mal, solo hay que reponer un dato. Va fuera del
-   formulario, así que trae su propio margen para alinearse con los campos. */
+/* Aviso, no error: nada salió mal, solo hay que reponer un dato. Pintarlo de
+   ámbar lo hacía parecer un problema; queda en superficie neutra y la jerarquía
+   la da la tipografía. Va fuera del formulario, así que trae su propio margen
+   para alinearse con los campos. */
 .form-notice {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  background: var(--color-warning-soft);
-  border: 1px solid var(--color-warning);
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-4);
   margin: var(--space-4) var(--space-4) calc(var(--space-4) * -1);
 }
 
-/* El candado carga el "por seguridad" sin gastar una línea de texto en decirlo. */
-.form-notice__icon {
-  flex: none;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-surface);
-  font-size: 0.95rem;
-  line-height: 1;
-}
-
-.form-notice__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
 .form-notice__title {
-  color: var(--color-warning);
+  color: var(--color-text);
   font-size: 0.9rem;
   font-weight: 700;
   line-height: 1.3;
 }
 
-/* La explicación va en texto normal: si todo grita, no se distingue el titular
-   de la letra chica. */
 .form-notice__detail {
   margin: 0;
   color: var(--color-text-muted);
   font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-/* Lo que de verdad tranquiliza va aparte y en el color del texto principal, no
-   perdido al final de una frase. */
-.form-notice__reassurance {
-  margin: 0;
-  color: var(--color-text);
-  font-size: 0.85rem;
-  font-weight: 600;
+  line-height: 1.55;
 }
 
 /* --------------------------------------------------------------- summary -- */

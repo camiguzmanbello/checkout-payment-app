@@ -314,13 +314,13 @@ describe('CheckoutModal', () => {
       renderWithNotice();
 
       expect(screen.getByRole('status')).toHaveTextContent(/vuelve a ingresar tu tarjeta/i);
-      expect(screen.getByRole('status')).toHaveTextContent(/al recargar la página se borró/i);
+      expect(screen.getByRole('status')).toHaveTextContent(/se borraron al recargar la página/i);
     });
 
     it('says outright that nothing was charged', () => {
       renderWithNotice();
 
-      expect(screen.getByRole('status')).toHaveTextContent(/no se hizo ningún cobro/i);
+      expect(screen.getByRole('status')).toHaveTextContent(/no se realizó ningún cobro/i);
     });
 
     it('stays quiet when the card was never lost', () => {
