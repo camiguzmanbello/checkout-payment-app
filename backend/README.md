@@ -140,6 +140,9 @@ the "Swagger URL".
 - `POST /transactions/:id/pay` — reserves the stock, tokenizes the card, charges
   it and waits for the final status (see below)
 - `GET /transactions/:id` — reads the current status
+- `GET /health` — liveness probe for the host, answers `{ "status": "ok" }`.
+  It skips rate limiting, stays out of Swagger and does not query the database
+  (see [In production](#in-production))
 
 ## Payment flow
 
@@ -213,7 +216,7 @@ npm run test        # run the suite
 npm run test:cov    # run with coverage
 ```
 
-110 tests across 20 suites. No test reaches the network or the database: the
+113 tests across 22 suites. No test reaches the network or the database: the
 gateway is exercised with `fetch` mocked and the repositories with the Prisma
 client mocked, so the suite is deterministic and can run in CI without any
 credentials.

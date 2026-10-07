@@ -7,6 +7,7 @@ import { ProductsController } from './modules/products/infrastructure/products.c
 import { CustomersController } from './modules/customers/customers.module';
 import { DeliveriesController } from './modules/deliveries/deliveries.module';
 import { TransactionsController } from './modules/transactions/infrastructure/transactions.controller';
+import { HealthController } from './modules/health/infrastructure/health.controller';
 
 describe('AppModule', () => {
   let moduleRef: TestingModule;
@@ -27,6 +28,10 @@ describe('AppModule', () => {
     expect(
       moduleRef.get(TransactionsController, { strict: false }),
     ).toBeDefined();
+  });
+
+  it('exposes the health check for the host', () => {
+    expect(moduleRef.get(HealthController, { strict: false })).toBeDefined();
   });
 
   // Rate limiting is a security control, so it must be global and not something

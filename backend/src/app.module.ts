@@ -5,6 +5,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { DeliveriesModule } from './modules/deliveries/deliveries.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     CustomersModule,
     DeliveriesModule,
     TransactionsModule,
+    HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
