@@ -103,6 +103,21 @@ const checkoutSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload;
+
+        // The selected product comes back from localStorage, so its id may
+        // belong to a catalogue that no longer exists (e.g. after the database
+        // was recreated). Sending it would only earn a PRODUCT_NOT_FOUND, so a
+        // product missing from the fresh catalogue sends the buyer back to it;
+        // one that is still there picks up its current price and stock.
+        if (!state.selectedProduct) return;
+        const fresh = action.payload.find((p) => p.id === state.selectedProduct.id);
+        if (fresh) {
+          state.selectedProduct = fresh;
+        } else if (state.step === 'checkout' || state.step === 'summary') {
+          state.selectedProduct = null;
+          state.transaction = null;
+          state.step = 'product';
+        }
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;

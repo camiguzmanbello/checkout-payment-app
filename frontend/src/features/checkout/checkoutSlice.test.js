@@ -95,6 +95,50 @@ describe('fetchProducts', () => {
     expect(store.getState().checkout.error).toBe('Servicio no disponible');
     expect(store.getState().checkout.loading).toBe(false);
   });
+
+  describe('with a product restored from a previous session', () => {
+    const initialState = reducer(undefined, { type: '@@INIT' });
+
+    it('refreshes it with the current price and stock', async () => {
+      const updated = { ...product, stock: 2 };
+      fetch.mockResolvedValueOnce(ok([updated]));
+      const store = makeStore({ ...initialState, step: 'checkout', selectedProduct: product });
+
+      await store.dispatch(fetchProducts());
+
+      expect(store.getState().checkout.selectedProduct).toEqual(updated);
+      expect(store.getState().checkout.step).toBe('checkout');
+    });
+
+    it('goes back to the catalogue when the product no longer exists', async () => {
+      fetch.mockResolvedValueOnce(ok([{ ...product, id: 'p2' }]));
+      const store = makeStore({
+        ...initialState,
+        step: 'summary',
+        selectedProduct: product,
+        transaction: { id: 't1' },
+        deliveryData: { city: 'Leticia' },
+      });
+
+      await store.dispatch(fetchProducts());
+
+      const state = store.getState().checkout;
+      expect(state.step).toBe('product');
+      expect(state.selectedProduct).toBeNull();
+      expect(state.transaction).toBeNull();
+      expect(state.deliveryData).toEqual({ city: 'Leticia' });
+    });
+
+    it('leaves the result screen alone', async () => {
+      fetch.mockResolvedValueOnce(ok([]));
+      const store = makeStore({ ...initialState, step: 'result', selectedProduct: product });
+
+      await store.dispatch(fetchProducts());
+
+      expect(store.getState().checkout.step).toBe('result');
+      expect(store.getState().checkout.selectedProduct).toEqual(product);
+    });
+  });
 });
 
 describe('submitCheckoutInfo', () => {
