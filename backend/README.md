@@ -39,6 +39,30 @@ traffic: the first request has to wake it up and can take a few extra seconds.
 (`https://checkout-payment-app-theta.vercel.app`) or the browser blocks every
 call with a CORS error — see the variable table below.
 
+The database lives on [Neon](https://neon.tech)'s free tier, not on Render.
+Render's free Postgres is deleted 30 days after it is created; when it went away
+the instance crash-looped, because `prisma migrate deploy` (and then
+`PrismaService.onModuleInit`) could not reach the server. Neon's free tier does
+not expire. Its compute scales to zero after 5 idle minutes, so the first query
+after a quiet spell adds a moment on top of Render's own wake-up.
+
+Use Neon's **direct** connection string (connection pooling off, no `-pooler`
+in the host) as `DATABASE_URL`: `prisma migrate deploy` does not work through
+the pooler.
+
+The Render service is configured with:
+
+| Setting | Value |
+| --- | --- |
+| Start Command | `npx prisma migrate deploy && npm run prisma:seed:prod && npm run start:prod` |
+| Health Check Path | `/health` |
+
+The seed runs on every start because a fresh database would otherwise come up
+with an empty catalogue, and the free tier has no shell to run it by hand. It is
+idempotent, so restarts do not duplicate products. Recreating the database does
+give every product a new id, which is why the frontend checks a product restored
+from `localStorage` against the catalogue before using it.
+
 ## How to run
 
 ```bash
